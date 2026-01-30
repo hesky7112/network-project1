@@ -1,11 +1,13 @@
 const isGithubPages = process.env.NEXT_PUBLIC_IS_GH_PAGES === 'true';
+const isCloudflare = process.env.NEXT_PUBLIC_IS_CLOUDFLARE === 'true';
+const isStaticExport = isGithubPages || isCloudflare;
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Output mode: 'export' for GitHub Pages, 'standalone' for Docker/others
-  output: isGithubPages ? 'export' : 'standalone',
+  // Output mode: 'export' for GitHub Pages/Cloudflare, 'standalone' for Docker/others
+  output: isStaticExport ? 'export' : 'standalone',
 
-  // Base path for GitHub Pages (repo name)
+  // Base path: Only needed for GitHub Pages project sites
   basePath: isGithubPages ? '/network-project1' : '',
 
   reactStrictMode: false,
@@ -35,7 +37,7 @@ const nextConfig = {
   },
 
   // Security headers (Only works in standalone mode, not export)
-  ...(isGithubPages ? {} : {
+  ...(!isStaticExport ? {
     async headers() {
       return [
         {
@@ -61,10 +63,10 @@ const nextConfig = {
         },
       ]
     },
-  }),
+  } : {}),
 
   // API rewrites (Only works in standalone mode, not export)
-  ...(isGithubPages ? {} : {
+  ...(!isStaticExport ? {
     async rewrites() {
       return [
         {
@@ -73,7 +75,7 @@ const nextConfig = {
         },
       ]
     },
-  }),
+  } : {}),
 
   // Bundle analyzer (only in analyze mode)
   ...(process.env.ANALYZE && {
@@ -85,7 +87,7 @@ const nextConfig = {
 
   // Image optimization
   images: {
-    unoptimized: isGithubPages, // Disable optimization for GitHub Pages
+    unoptimized: isStaticExport, // Disable optimization for Static Exports
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
