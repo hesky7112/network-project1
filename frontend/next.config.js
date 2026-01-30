@@ -1,7 +1,13 @@
+const isGithubPages = process.env.NEXT_PUBLIC_IS_GH_PAGES === 'true';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable standalone output for Docker
-  output: 'standalone',
+  // Output mode: 'export' for GitHub Pages, 'standalone' for Docker/others
+  output: isGithubPages ? 'export' : 'standalone',
+
+  // Base path for GitHub Pages (repo name)
+  basePath: isGithubPages ? '/network-project1' : '',
+
   reactStrictMode: false,
   // Add transpilePackages for ReactFlow and D3 stability
   transpilePackages: [
@@ -28,42 +34,46 @@ const nextConfig = {
     webVitalsAttribution: ['CLS', 'LCP'],
   },
 
-  // Security headers
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()',
-          },
-        ],
-      },
-    ]
-  },
+  // Security headers (Only works in standalone mode, not export)
+  ...(isGithubPages ? {} : {
+    async headers() {
+      return [
+        {
+          source: '/(.*)',
+          headers: [
+            {
+              key: 'X-Frame-Options',
+              value: 'DENY',
+            },
+            {
+              key: 'X-Content-Type-Options',
+              value: 'nosniff',
+            },
+            {
+              key: 'Referrer-Policy',
+              value: 'origin-when-cross-origin',
+            },
+            {
+              key: 'Permissions-Policy',
+              value: 'camera=(), microphone=(), geolocation=()',
+            },
+          ],
+        },
+      ]
+    },
+  }),
 
-  // API rewrites for backend proxy
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'http://localhost:8080/api/:path*',
-      },
-    ]
-  },
+  // API rewrites (Only works in standalone mode, not export)
+  ...(isGithubPages ? {} : {
+    async rewrites() {
+      return [
+        {
+          source: '/api/:path*',
+          destination: 'http://localhost:8080/api/:path*',
+        },
+      ]
+    },
+  }),
 
   // Bundle analyzer (only in analyze mode)
   ...(process.env.ANALYZE && {
@@ -75,6 +85,7 @@ const nextConfig = {
 
   // Image optimization
   images: {
+    unoptimized: isGithubPages, // Disable optimization for GitHub Pages
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
