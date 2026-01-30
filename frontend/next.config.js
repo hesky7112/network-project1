@@ -1,15 +1,7 @@
-const isGithubPages = process.env.NEXT_PUBLIC_IS_GH_PAGES === 'true';
-const isCloudflare = process.env.NEXT_PUBLIC_IS_CLOUDFLARE === 'true';
-const isStaticExport = isGithubPages || isCloudflare;
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Output mode: 'export' for GitHub Pages/Cloudflare, 'standalone' for Docker/others
-  output: isStaticExport ? 'export' : 'standalone',
-
-  // Base path: Only needed for GitHub Pages project sites
-  basePath: isGithubPages ? '/network-project1' : '',
-
+  // Enable standalone output for Docker
+  output: 'standalone',
   reactStrictMode: false,
   // Add transpilePackages for ReactFlow and D3 stability
   transpilePackages: [
@@ -36,46 +28,42 @@ const nextConfig = {
     webVitalsAttribution: ['CLS', 'LCP'],
   },
 
-  // Security headers (Only works in standalone mode, not export)
-  ...(!isStaticExport ? {
-    async headers() {
-      return [
-        {
-          source: '/(.*)',
-          headers: [
-            {
-              key: 'X-Frame-Options',
-              value: 'DENY',
-            },
-            {
-              key: 'X-Content-Type-Options',
-              value: 'nosniff',
-            },
-            {
-              key: 'Referrer-Policy',
-              value: 'origin-when-cross-origin',
-            },
-            {
-              key: 'Permissions-Policy',
-              value: 'camera=(), microphone=(), geolocation=()',
-            },
-          ],
-        },
-      ]
-    },
-  } : {}),
+  // Security headers
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+        ],
+      },
+    ]
+  },
 
-  // API rewrites (Only works in standalone mode, not export)
-  ...(!isStaticExport ? {
-    async rewrites() {
-      return [
-        {
-          source: '/api/:path*',
-          destination: 'http://localhost:8080/api/:path*',
-        },
-      ]
-    },
-  } : {}),
+  // API rewrites for backend proxy
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:8080/api/:path*',
+      },
+    ]
+  },
 
   // Bundle analyzer (only in analyze mode)
   ...(process.env.ANALYZE && {
@@ -87,7 +75,6 @@ const nextConfig = {
 
   // Image optimization
   images: {
-    unoptimized: isStaticExport, // Disable optimization for Static Exports
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
