@@ -1,0 +1,60 @@
+{
+    "id": "medical-image-analyzer",
+    "name": "Medical Image Analyzer",
+    "version": "1.0.0",
+    "description": "AI-powered analysis of X-rays, CT scans, and MRIs using MONAI.",
+    "category": "healthcare",
+    "tags": [
+        "medical",
+        "ai",
+        "monai",
+        "radiology",
+        "dicom"
+    ],
+    "execution_mode": "server",
+    "primitives": [
+        {
+            "module": "MLEngine",
+            "method": "analyze_medical_image",
+            "config": {
+                "model": "monai_unet"
+            }
+        },
+        {
+            "module": "ReportGeneration",
+            "method": "generate_pdf",
+            "config": {
+                "template": "medical_report"
+            }
+        }
+    ],
+    "ui": {
+        "form_fields": [
+            {
+                "name": "scan_file",
+                "type": "file",
+                "label": "Upload DICOM/X-ray Image",
+                "required": true
+            }
+        ],
+        "output_type": "dashboard"
+    },
+    "pricing": {
+        "license_type": "lease",
+        "price": 199,
+        "currency": "USD"
+    },
+    "requirements": {
+        "requires_hal": false,
+        "requires_gpu": true,
+        "python_packages": [
+            "monai",
+            "torch",
+            "numpy"
+        ],
+        "wasm_compatible": false
+    },
+    "author": {
+        "name": "AlienNet Healthcare"
+    }
+}

@@ -1,0 +1,99 @@
+{
+    "id": "church-archive-digitizer",
+    "name": "Church Archive Digitizer",
+    "version": "1.0.0",
+    "description": "Convert handwritten ledgers into searchable digital archives using AI-powered OCR.",
+    "long_description": "Transform your church's historical paper records into a searchable digital archive. This module uses advanced AI-powered OCR to extract text from handwritten ledgers, offering summaries, member records, and contribution history.",
+    "category": "church",
+    "tags": [
+        "ocr",
+        "pdf",
+        "church",
+        "archive",
+        "digitization"
+    ],
+    "execution_mode": "hybrid",
+    "primitives": [
+        {
+            "module": "DocumentIntelligence",
+            "method": "extract_text",
+            "config": {
+                "ocr_size": "gundam"
+            }
+        },
+        {
+            "module": "DataValidation",
+            "method": "sanitize_input",
+            "config": {},
+            "input_mapping": {
+                "data": "content"
+            }
+        },
+        {
+            "module": "ReportGeneration",
+            "method": "generate_pdf",
+            "config": {
+                "template": "church_ledger",
+                "title": "Church Archive Report"
+            },
+            "input_mapping": {
+                "data": "sanitized"
+            }
+        }
+    ],
+    "ui": {
+        "form_fields": [
+            {
+                "name": "pdf_file",
+                "type": "file",
+                "label": "Upload Ledger PDF",
+                "required": true,
+                "accept": ".pdf"
+            },
+            {
+                "name": "year",
+                "type": "number",
+                "label": "Ledger Year",
+                "required": false
+            },
+            {
+                "name": "church_name",
+                "type": "text",
+                "label": "Church Name",
+                "required": true
+            }
+        ],
+        "output_type": "download"
+    },
+    "pricing": {
+        "license_type": "purchase",
+        "price": 299,
+        "currency": "KES",
+        "preview_days": 7,
+        "preview_executions": 10
+    },
+    "requirements": {
+        "requires_hal": false,
+        "requires_gpu": false,
+        "min_memory_mb": 512,
+        "compatible_auras": [
+            "church",
+            "default"
+        ],
+        "python_packages": [
+            "pdf-craft",
+            "reportlab"
+        ],
+        "wasm_compatible": true
+    },
+    "author": {
+        "name": "AlienNet",
+        "organization": "AlienNet Ltd",
+        "email": "modules@aliennet.io",
+        "website": "https://aliennet.io"
+    },
+    "files": {
+        "ui": "ui.marimo",
+        "config": "config.yaml"
+    }
+}

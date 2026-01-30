@@ -1,0 +1,62 @@
+{
+    "id": "event-ticketing",
+    "name": "Event Ticketing System",
+    "version": "1.0.0",
+    "description": "Generate QR/NFC tickets, manage check-ins, and track attendance for events.",
+    "category": "events",
+    "tags": [
+        "events",
+        "tickets",
+        "qr",
+        "nfc",
+        "mpesa"
+    ],
+    "execution_mode": "hybrid",
+    "primitives": [
+        {
+            "module": "ReportGeneration",
+            "method": "generate_qr_code",
+            "config": {}
+        },
+        {
+            "module": "HALInterface",
+            "method": "scan_nfc",
+            "config": {}
+        },
+        {
+            "module": "PaymentProcessing",
+            "method": "initiate_mpesa_stk",
+            "config": {}
+        }
+    ],
+    "ui": {
+        "form_fields": [
+            {
+                "name": "event_name",
+                "type": "text",
+                "label": "Event Name",
+                "required": true
+            },
+            {
+                "name": "ticket_price",
+                "type": "number",
+                "label": "Ticket Price (KES)",
+                "required": true
+            }
+        ],
+        "output_type": "download"
+    },
+    "pricing": {
+        "license_type": "lease",
+        "price": 59,
+        "currency": "USD"
+    },
+    "requirements": {
+        "requires_hal": true,
+        "requires_gpu": false,
+        "wasm_compatible": true
+    },
+    "author": {
+        "name": "AlienNet"
+    }
+}

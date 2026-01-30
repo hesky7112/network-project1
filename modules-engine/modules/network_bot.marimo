@@ -1,0 +1,5 @@
+import marimo as mo
+
+mo.md("# Network Troubleshooter Bot placeholder")
+query = mo.ui.text(label="Neural Query")
+mo.md(f"Core analysis for: {query.value}")

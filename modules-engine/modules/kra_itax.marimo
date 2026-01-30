@@ -1,0 +1,6 @@
+import marimo as mo
+
+mo.md("# KRA iTax Auto-Filer placeholder")
+pin = mo.ui.text(label="KRA PIN")
+period = mo.ui.text(label="Period")
+mo.md(f"Ready to file for {pin.value}...")

@@ -1,0 +1,27 @@
+apiVersion: 1
+
+datasources:
+  - name: PostgreSQL
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    database: networking
+    user: networking
+    secureJsonData:
+      password: "networking_password"
+    jsonData:
+      sslmode: "disable"
+
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+
+  - name: InfluxDB
+    type: influxdb
+    access: proxy
+    url: http://influxdb:8086
+    database: networking_metrics
+    jsonData:
+      httpMode: GET

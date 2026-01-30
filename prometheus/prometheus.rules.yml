@@ -1,0 +1,49 @@
+groups:
+- name: WebSocket Alerts
+  rules:
+  - alert: HighWebSocketErrorRate
+    expr: rate(websocket_errors_total[5m]) > 5
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      summary: "High WebSocket error rate on {{ $labels.instance }}"
+      description: "WebSocket error rate is {{ $value }} per second"
+
+  - alert: WebSocketConnectionDropped
+    expr: websocket_connections == 0
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "WebSocket connection lost on {{ $labels.instance }}"
+      description: "No active WebSocket connections for 5 minutes"
+
+- name: System Alerts
+  rules:
+  - alert: HighCPU
+    expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100 > 80
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High CPU usage on {{ $labels.instance }}"
+      description: "CPU usage is {{ $value }}%"
+
+  - alert: HighMemory
+    expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 90
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High memory usage on {{ $labels.instance }}"
+      description: "Memory usage is {{ $value }}%"
+
+  - alert: LowDiskSpace
+    expr: (node_filesystem_avail_bytes{mountpoint="/"} * 100) / node_filesystem_size_bytes{mountpoint="/"} < 10
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Low disk space on {{ $labels.instance }}"
+      description: "Only {{ $value | humanizePercentage }} space left on disk"

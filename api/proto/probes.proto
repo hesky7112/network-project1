@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package probes;
+
+option go_package = "networking-main/pkg/probes/proto";
+
+import "google/protobuf/timestamp.proto";
+
+service ProbeService {
+  // StreamResults allows a remote probe to send real-time metrics back to the King server
+  rpc StreamResults(stream ProbeResult) returns (StreamSummary) {}
+  
+  // GetConfig allows the probe to fetch its monitoring configuration
+  rpc GetConfig(ProbeIdentity) returns (ProbeConfig) {}
+
+  // Bidirectional heartbeats for real-time reachability
+  rpc Heartbeat(stream Pulse) returns (stream Pulse) {}
+}
+
+message ProbeIdentity {
+  string probe_id = 1;
+  string auth_token = 2;
+}
+
+message ProbeResult {
+  string probe_id = 1;
+  string target_ip = 2;
+  string metric_type = 3; // "latency", "packet_loss", "jitter"
+  double value = 4;
+  google.protobuf.Timestamp timestamp = 5;
+  map<string, string> metadata = 6;
+}
+
+message StreamSummary {
+  int64 total_received = 1;
+  string status = 2;
+}
+
+message ProbeConfig {
+  repeated string targets = 1;
+  int32 interval_seconds = 2;
+  string scan_type = 3; // "icmp", "tcp", "udp"
+}
+
+message Pulse {
+  string probe_id = 1;
+  google.protobuf.Timestamp timestamp = 2;
+}

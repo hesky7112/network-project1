@@ -1,0 +1,795 @@
+import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import Layout from '@/components/layout'
+import { apiClient } from '@/lib/api'
+import { Device, NetworkAlert, NetworkStats } from '@/types'
+import { Button } from '@/components/ui/button'
+import {
+  Server,
+  Network,
+  Activity,
+  AlertTriangle,
+  Wifi,
+  TrendingUp,
+  TrendingDown,
+  Clock,
+  Eye,
+  RefreshCw,
+  CheckCircle,
+  Zap,
+  BarChart3,
+  PieChart,
+  LineChart,
+  AreaChart,
+  ChevronRight,
+  Globe,
+  AlertCircle,
+  Cpu
+} from '@/components/icons'
+import {
+  LineChart as RechartsLineChart,
+  Line,
+  AreaChart as RechartsAreaChart,
+  Area,
+  BarChart as RechartsBarChart,
+  Bar,
+  PieChart as RechartsPieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  RadialBarChart,
+  RadialBar
+} from 'recharts'
+
+export default function Dashboard() {
+  const [stats, setStats] = useState<NetworkStats>({
+    total_devices: 0,
+    active_devices: 0,
+    total_alerts: 0,
+    critical_alerts: 0,
+    uptime_percentage: 0,
+    bandwidth_usage: 0,
+  })
+
+  // Fetch devices
+  const { data: devices, isLoading: devicesLoading, refetch: refetchDevices } = useQuery({
+    queryKey: ['devices'],
+    queryFn: () => apiClient.getDevices(),
+    refetchInterval: 30000,
+  })
+
+  // Fetch alerts
+  const { data: alerts, isLoading: alertsLoading, refetch: refetchAlerts } = useQuery({
+    queryKey: ['alerts'],
+    queryFn: () => apiClient.getAlerts(),
+    refetchInterval: 30000,
+  })
+
+  // Fetch live metrics
+  const { data: metrics, refetch: refetchMetrics } = useQuery({
+    queryKey: ['metrics'],
+    queryFn: () => apiClient.getLiveMetrics(),
+    refetchInterval: 10000,
+  })
+
+  useEffect(() => {
+    if (devices && alerts) {
+      const totalDevices = devices.length
+      const activeDevices = devices.filter((d: Device) => d.status === 'active').length
+      const totalAlerts = alerts.length
+      const criticalAlerts = alerts.filter((a: NetworkAlert) => a.severity === 'critical').length
+
+      setStats({
+        total_devices: totalDevices,
+        active_devices: activeDevices,
+        total_alerts: totalAlerts,
+        critical_alerts: criticalAlerts,
+        uptime_percentage: 99.7,
+        bandwidth_usage: 67.3,
+      })
+    }
+  }, [devices, alerts])
+
+  const recentDevices = devices?.slice(0, 6) || []
+  const recentAlerts = alerts?.slice(0, 6) || []
+
+  const handleRefreshAll = () => {
+    refetchDevices()
+    refetchAlerts()
+    refetchMetrics()
+  }
+
+  const StatCard = ({ title, value, subtitle, icon: Icon, color, trend }: {
+    title: string
+    value: string | number
+    subtitle?: string
+    icon: any
+    color: string
+    trend?: 'up' | 'down' | 'neutral'
+  }) => (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden group">
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className={`p-3 rounded-xl bg-gradient-to-br ${color} group-hover:scale-110 transition-transform duration-300`}>
+            <Icon className="h-6 w-6 text-white" />
+          </div>
+          {trend && (
+            <div className={`flex items-center ${
+              trend === 'up' ? 'text-green-500' :
+              trend === 'down' ? 'text-red-500' : 'text-gray-500'
+            }`}>
+              {trend === 'up' ? <TrendingUp className="h-4 w-4" /> :
+               trend === 'down' ? <TrendingDown className="h-4 w-4" /> :
+               <Activity className="h-4 w-4" />}
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-1">
+          <p className="text-sm font-medium text-gray-600">{title}</p>
+          <p className="text-3xl font-bold text-gray-900">{value}</p>
+          {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+        </div>
+
+        {/* Mini chart visualization */}
+        <div className="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div
+            className={`h-full bg-gradient-to-r ${color.replace('from-', 'from-').replace('to-', 'to-')} rounded-full transition-all duration-1000`}
+            style={{ width: typeof value === 'string' && value.includes('%') ? value : '75%' }}
+          ></div>
+        </div>
+      </div>
+    </div>
+  )
+
+  const DeviceCard = ({ device }: { device: Device }) => (
+    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200 group">
+      <div className="flex items-center space-x-4">
+        <div className={`p-2 rounded-lg ${
+          device.status === 'active' ? 'bg-green-100' : 'bg-gray-100'
+        }`}>
+          {device.device_type === 'Cisco Router/Switch' ? (
+            <Network className="h-5 w-5 text-blue-600" />
+          ) : (
+            <Server className="h-5 w-5 text-gray-600" />
+          )}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-gray-900 truncate">
+            {device.hostname || device.ip_address}
+          </p>
+          <p className="text-xs text-gray-500">
+            {device.ip_address} • {device.device_type}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+          device.status === 'active'
+            ? 'bg-green-100 text-green-800'
+            : device.status === 'inactive'
+            ? 'bg-red-100 text-red-800'
+            : 'bg-yellow-100 text-yellow-800'
+        }`}>
+          <div className={`w-2 h-2 rounded-full mr-1.5 ${
+            device.status === 'active' ? 'bg-green-500' : 'bg-gray-400'
+          }`}></div>
+          {device.status}
+        </div>
+
+        <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
+      </div>
+    </div>
+  )
+
+  const AlertCard = ({ alert }: { alert: NetworkAlert }) => (
+    <div className={`p-4 rounded-lg border-l-4 ${
+      alert.severity === 'critical' ? 'border-red-500 bg-red-50' :
+      alert.severity === 'warning' ? 'border-yellow-500 bg-yellow-50' :
+      'border-blue-500 bg-blue-50'
+    }`}>
+      <div className="flex items-start justify-between">
+        <div className="flex items-start space-x-3">
+          <AlertTriangle className={`h-5 w-5 mt-0.5 ${
+            alert.severity === 'critical' ? 'text-red-500' :
+            alert.severity === 'warning' ? 'text-yellow-500' :
+            'text-blue-500'
+          }`} />
+
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-900">
+              {alert.type.replace('_', ' ').toUpperCase()}
+            </p>
+            <p className="text-sm text-gray-600 mt-1">{alert.message}</p>
+            <div className="flex items-center mt-2 space-x-4 text-xs text-gray-500">
+              <span className="flex items-center">
+                <Clock className="h-3 w-3 mr-1" />
+                {new Date(alert.created_at).toLocaleTimeString()}
+              </span>
+              <span className="flex items-center">
+                <Globe className="h-3 w-3 mr-1" />
+                {alert.device?.hostname || alert.device?.ip_address || 'Unknown Device'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+          alert.severity === 'critical' ? 'bg-red-100 text-red-800' :
+          alert.severity === 'warning' ? 'bg-yellow-100 text-yellow-800' :
+          'bg-blue-100 text-blue-800'
+        }`}>
+          {alert.severity}
+        </span>
+      </div>
+    </div>
+  )
+
+  return (
+    <Layout title="Dashboard">
+      {/* Main Container with optimized responsive spacing */}
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-1 sm:py-2 lg:py-4">
+
+          {/* Header Section - Reduced spacing on larger screens */}
+          <div className="mb-3 sm:mb-4 lg:mb-6">
+            <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+              <div className="flex-1">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 mb-1 sm:mb-2">
+                  Network Dashboard
+                </h1>
+                <p className="text-sm sm:text-base lg:text-lg text-gray-600">
+                  Monitor and manage your network infrastructure in real-time
+                </p>
+              </div>
+
+              {/* Status and Actions - Responsive layout */}
+              <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
+                <div className="flex items-center bg-green-50 px-3 sm:px-4 py-2 rounded-lg border border-green-200">
+                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full mr-2 sm:mr-3 animate-pulse"></div>
+                  <span className="text-xs sm:text-sm font-medium text-green-800">All Systems Operational</span>
+                </div>
+                <Button
+                  onClick={handleRefreshAll}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center hover:bg-blue-50 hover:border-blue-300 whitespace-nowrap"
+                >
+                  <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                  Refresh
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Key Metrics - Multi-platform responsive grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-3 sm:mb-4 lg:mb-6">
+            <StatCard
+              title="Total Devices"
+              value={stats.total_devices}
+              subtitle={`${stats.active_devices} active • ${((stats.active_devices / stats.total_devices) * 100).toFixed(1)}% uptime`}
+              icon={Server}
+              color="from-blue-500 to-blue-600"
+              trend="up"
+            />
+
+            <StatCard
+              title="Network Health"
+              value={`${stats.uptime_percentage}%`}
+              subtitle="30-day uptime"
+              icon={Activity}
+              color="from-green-500 to-green-600"
+              trend="up"
+            />
+
+            <StatCard
+              title="Active Alerts"
+              value={stats.critical_alerts}
+              subtitle={`${stats.total_alerts} total alerts`}
+              icon={AlertTriangle}
+              color={stats.critical_alerts > 0 ? "from-red-500 to-red-600" : "from-gray-500 to-gray-600"}
+              trend={stats.critical_alerts > 0 ? 'down' : 'neutral'}
+            />
+
+            <StatCard
+              title="Bandwidth Usage"
+              value={`${stats.bandwidth_usage}%`}
+              subtitle="Current utilization"
+              icon={Wifi}
+              color="from-purple-500 to-purple-600"
+              trend="neutral"
+            />
+          </div>
+
+          {/* Main Dashboard Grid - Enhanced responsive layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6 sm:gap-8 mb-3 sm:mb-4 lg:mb-6">
+
+            {/* Left Column - Devices & Recent Activity - Responsive spans */}
+            <div className="lg:col-span-2 xl:col-span-2 2xl:col-span-3 space-y-6 sm:space-y-8">
+
+              {/* Recent Devices - Enhanced for all screen sizes */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-white">
+                  <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+                    <div className="flex items-center">
+                      <Server className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-blue-600" />
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Network Devices</h3>
+                    </div>
+                    <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 self-start sm:self-auto">
+                      <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                      View All Devices
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="p-4 sm:p-6">
+                  {devicesLoading ? (
+                    <div className="space-y-3 sm:space-y-4">
+                      {[...Array(4)].map((_, i) => (
+                        <div key={i} className="animate-pulse">
+                          <div className="h-16 sm:h-20 bg-gray-200 rounded-xl"></div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : recentDevices.length > 0 ? (
+                    <div className="grid gap-3 sm:gap-4 grid-cols-1 xl:grid-cols-2">
+                      {recentDevices.map((device: Device) => (
+                        <DeviceCard key={device.id} device={device} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 sm:py-12">
+                      <Server className="h-12 w-12 sm:h-16 sm:w-16 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-500 font-medium mb-2 text-sm sm:text-base">No devices discovered yet</p>
+                      <p className="text-xs sm:text-sm text-gray-400 mb-4">Devices will appear here once discovered</p>
+                      <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                        <Network className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                        Run Network Discovery
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Recent Alerts - Responsive full width */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-gradient-to-r from-orange-50 to-white">
+                  <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+                    <div className="flex items-center">
+                      <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-orange-600" />
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Recent Alerts</h3>
+                      {stats.critical_alerts > 0 && (
+                        <span className="ml-2 sm:ml-3 px-2 sm:px-3 py-1 bg-red-100 text-red-800 text-xs sm:text-sm font-medium rounded-full">
+                          {stats.critical_alerts} critical
+                        </span>
+                      )}
+                    </div>
+                    <Button variant="ghost" size="sm" className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 self-start sm:self-auto">
+                      <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                      View All Alerts
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="p-4 sm:p-6">
+                  {alertsLoading ? (
+                    <div className="space-y-3 sm:space-y-4">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="animate-pulse">
+                          <div className="h-20 sm:h-24 bg-gray-200 rounded-xl"></div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : recentAlerts.length > 0 ? (
+                    <div className="space-y-3 sm:space-y-4">
+                      {recentAlerts.map((alert: NetworkAlert) => (
+                        <AlertCard key={alert.id} alert={alert} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 sm:py-12">
+                      <CheckCircle className="h-12 w-12 sm:h-16 sm:w-16 text-green-400 mx-auto mb-4" />
+                      <p className="text-gray-500 font-medium mb-2 text-sm sm:text-base">No active alerts</p>
+                      <p className="text-xs sm:text-sm text-gray-400">Your network is running smoothly</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - System Health & Actions - Enhanced for tablets and up */}
+            <div className="space-y-4 sm:space-y-6 lg:space-y-8">
+
+              {/* System Performance - Enhanced sizing */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-gradient-to-r from-green-50 to-white">
+                  <div className="flex items-center">
+                    <Activity className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-green-600" />
+                    <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900">System Performance</h3>
+                  </div>
+                </div>
+
+                <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+                  <div>
+                    <div className="flex justify-between text-xs sm:text-sm mb-2 sm:mb-3">
+                      <span className="text-gray-700 font-medium">Bandwidth</span>
+                      <span className="font-semibold text-gray-900">{stats.bandwidth_usage}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3 overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 sm:h-3 rounded-full transition-all duration-1000"
+                        style={{ width: `${stats.bandwidth_usage}%` }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-xs sm:text-sm mb-2 sm:mb-3">
+                      <span className="text-gray-700 font-medium">CPU Usage</span>
+                      <span className="font-semibold text-gray-900">45.2%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3 overflow-hidden">
+                      <div className="bg-gradient-to-r from-green-500 to-green-600 h-2 sm:h-3 rounded-full" style={{ width: '45.2%' }}></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-xs sm:text-sm mb-2 sm:mb-3">
+                      <span className="text-gray-700 font-medium">Memory</span>
+                      <span className="font-semibold text-gray-900">67.8%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3 overflow-hidden">
+                      <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 h-2 sm:h-3 rounded-full" style={{ width: '67.8%' }}></div>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 sm:pt-4 border-t border-gray-200">
+                    <div className="text-center">
+                      <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">98.5%</div>
+                      <div className="text-xs sm:text-sm text-gray-600">Overall Health</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Actions - Enhanced for mobile */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-white">
+                  <div className="flex items-center">
+                    <Zap className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-purple-600" />
+                    <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900">Quick Actions</h3>
+                  </div>
+                </div>
+
+                <div className="p-4 sm:p-6">
+                  <div className="space-y-2 sm:space-y-3">
+                    <Button className="w-full justify-start bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-base" size="sm">
+                      <Network className="h-3 w-3 sm:h-4 sm:w-4 mr-2 sm:mr-3" />
+                      Run Network Discovery
+                    </Button>
+                    <Button className="w-full justify-start text-sm sm:text-base" variant="outline" size="sm">
+                      <Activity className="h-3 w-3 sm:h-4 sm:w-4 mr-2 sm:mr-3" />
+                      Generate Report
+                    </Button>
+                    <Button className="w-full justify-start text-sm sm:text-base" variant="outline" size="sm">
+                      <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 mr-2 sm:mr-3" />
+                      View All Alerts
+                    </Button>
+                    <Button className="w-full justify-start text-sm sm:text-base" variant="outline" size="sm">
+                      <Cpu className="h-3 w-3 sm:h-4 sm:w-4 mr-2 sm:mr-3" />
+                      System Diagnostics
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Live Metrics Summary - Enhanced for tablets */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-white">
+                  <div className="flex items-center">
+                    <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-indigo-600" />
+                    <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900">Live Metrics</h3>
+                  </div>
+                </div>
+
+                <div className="p-4 sm:p-6">
+                  <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl sm:text-3xl font-bold text-indigo-600 mb-1">{metrics?.length || 0}</div>
+                      <div className="text-xs sm:text-sm text-gray-600">Active Metrics</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl sm:text-3xl font-bold text-green-600 mb-1">2.4 TB</div>
+                      <div className="text-xs sm:text-sm text-gray-600">Data Processed</div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
+                    <div className="flex items-center justify-between text-xs sm:text-sm">
+                      <span className="text-gray-600">Last Updated</span>
+                      <span className="font-medium text-gray-900">{new Date().toLocaleTimeString()}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          </div>
+
+          {/* Analytics Charts Section - New Visualizations */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6 sm:gap-8 mb-3 sm:mb-4 lg:mb-6">
+
+            {/* Bandwidth Usage Over Time */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-white">
+                <div className="flex items-center">
+                  <LineChart className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-blue-600" />
+                  <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900">Bandwidth Usage</h3>
+                </div>
+              </div>
+              <div className="p-4 sm:p-6">
+                <ResponsiveContainer width="100%" height={250}>
+                  <RechartsAreaChart data={[
+                    { time: '00:00', usage: 45 },
+                    { time: '04:00', usage: 32 },
+                    { time: '08:00', usage: 78 },
+                    { time: '12:00', usage: 85 },
+                    { time: '16:00', usage: 92 },
+                    { time: '20:00', usage: 67 },
+                  ]}>
+                    <defs>
+                      <linearGradient id="bandwidthGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                    <XAxis dataKey="time" stroke="#6B7280" fontSize={12} />
+                    <YAxis stroke="#6B7280" fontSize={12} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: '1px solid #E5E7EB',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="usage"
+                      stroke="#3B82F6"
+                      strokeWidth={2}
+                      fill="url(#bandwidthGradient)"
+                    />
+                  </RechartsAreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Device Status Distribution */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-gradient-to-r from-green-50 to-white">
+                <div className="flex items-center">
+                  <PieChart className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-green-600" />
+                  <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900">Device Status</h3>
+                </div>
+              </div>
+              <div className="p-4 sm:p-6">
+                <ResponsiveContainer width="100%" height={250}>
+                  <RechartsPieChart>
+                    <Pie
+                      data={[
+                        { name: 'Active', value: stats.active_devices, fill: '#10B981' },
+                        { name: 'Inactive', value: Math.max(0, stats.total_devices - stats.active_devices), fill: '#EF4444' },
+                      ]}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={80}
+                      dataKey="value"
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    />
+                    <Tooltip />
+                  </RechartsPieChart>
+                </ResponsiveContainer>
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600">{stats.active_devices}</div>
+                    <div className="text-sm text-gray-600">Active</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-red-600">{Math.max(0, stats.total_devices - stats.active_devices)}</div>
+                    <div className="text-sm text-gray-600">Inactive</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Network Performance Metrics */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden xl:col-span-1 2xl:col-span-1">
+              <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-white">
+                <div className="flex items-center">
+                  <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-purple-600" />
+                  <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900">Performance Metrics</h3>
+                </div>
+              </div>
+              <div className="p-4 sm:p-6">
+                <ResponsiveContainer width="100%" height={250}>
+                  <RechartsBarChart data={[
+                    { name: 'CPU', value: 45.2, color: '#10B981' },
+                    { name: 'Memory', value: 67.8, color: '#F59E0B' },
+                    { name: 'Disk', value: 34.8, color: '#8B5CF6' },
+                    { name: 'Network', value: 78.3, color: '#3B82F6' },
+                  ]}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                    <XAxis dataKey="name" stroke="#6B7280" fontSize={12} />
+                    <YAxis stroke="#6B7280" fontSize={12} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: '1px solid #E5E7EB',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                    <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                      {[
+                        { name: 'CPU', value: 45.2, color: '#10B981' },
+                        { name: 'Memory', value: 67.8, color: '#F59E0B' },
+                        { name: 'Disk', value: 34.8, color: '#8B5CF6' },
+                        { name: 'Network', value: 78.3, color: '#3B82F6' },
+                      ].map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Bar>
+                  </RechartsBarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          {/* Advanced Analytics Section */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8 mb-3 sm:mb-4 lg:mb-6">
+
+            {/* Network Traffic Flow */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-white">
+                <div className="flex items-center">
+                  <AreaChart className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-indigo-600" />
+                  <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900">Network Traffic Flow</h3>
+                </div>
+              </div>
+              <div className="p-4 sm:p-6">
+                <ResponsiveContainer width="100%" height={300}>
+                  <RechartsLineChart data={[
+                    { time: '00:00', inbound: 120, outbound: 80 },
+                    { time: '04:00', inbound: 90, outbound: 110 },
+                    { time: '08:00', inbound: 180, outbound: 150 },
+                    { time: '12:00', inbound: 220, outbound: 190 },
+                    { time: '16:00', inbound: 250, outbound: 210 },
+                    { time: '20:00', inbound: 160, outbound: 140 },
+                  ]}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                    <XAxis dataKey="time" stroke="#6B7280" fontSize={12} />
+                    <YAxis stroke="#6B7280" fontSize={12} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: '1px solid #E5E7EB',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="inbound"
+                      stroke="#3B82F6"
+                      strokeWidth={3}
+                      name="Inbound"
+                      dot={{ fill: '#3B82F6', strokeWidth: 2, r: 4 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="outbound"
+                      stroke="#10B981"
+                      strokeWidth={3}
+                      name="Outbound"
+                      dot={{ fill: '#10B981', strokeWidth: 2, r: 4 }}
+                    />
+                  </RechartsLineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* System Health Radial Chart */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-gradient-to-r from-emerald-50 to-white">
+                <div className="flex items-center">
+                  <Activity className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-emerald-600" />
+                  <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900">System Health Overview</h3>
+                </div>
+              </div>
+              <div className="p-4 sm:p-6">
+                <div className="grid grid-cols-2 gap-8">
+                  {/* CPU Usage */}
+                  <div className="text-center">
+                    <ResponsiveContainer width={120} height={120} className="mx-auto mb-4">
+                      <RadialBarChart cx="50%" cy="50%" innerRadius="60%" outerRadius="90%" data={[{ value: 45.2 }]}>
+                        <RadialBar dataKey="value" cornerRadius={10} fill="#10B981" />
+                      </RadialBarChart>
+                    </ResponsiveContainer>
+                    <div className="text-2xl font-bold text-gray-900">45.2%</div>
+                    <div className="text-sm text-gray-600">CPU Usage</div>
+                  </div>
+
+                  {/* Memory Usage */}
+                  <div className="text-center">
+                    <ResponsiveContainer width={120} height={120} className="mx-auto mb-4">
+                      <RadialBarChart cx="50%" cy="50%" innerRadius="60%" outerRadius="90%" data={[{ value: 67.8 }]}>
+                        <RadialBar dataKey="value" cornerRadius={10} fill="#F59E0B" />
+                      </RadialBarChart>
+                    </ResponsiveContainer>
+                    <div className="text-2xl font-bold text-gray-900">67.8%</div>
+                    <div className="text-sm text-gray-600">Memory</div>
+                  </div>
+                </div>
+
+                {/* Health Score */}
+                <div className="mt-8 text-center">
+                  <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-green-400 to-green-600 rounded-full mb-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-white">98.5</div>
+                      <div className="text-sm text-green-100">Health</div>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600">Overall System Health Score</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Summary Cards - Enhanced responsive grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-2 sm:mt-4 lg:mt-6">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 sm:p-8 border border-blue-200 hover:shadow-lg transition-shadow duration-300">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-base sm:text-lg font-semibold text-blue-900 mb-2">Network Connections</p>
+                  <p className="text-3xl sm:text-4xl font-bold text-blue-900">{metrics?.length || 0}</p>
+                  <p className="text-xs sm:text-sm text-blue-700 mt-2">Active connections monitored</p>
+                </div>
+                <Wifi className="h-10 w-10 sm:h-12 sm:w-12 text-blue-600 opacity-80 ml-4" />
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 sm:p-8 border border-green-200 hover:shadow-lg transition-shadow duration-300">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-base sm:text-lg font-semibold text-green-900 mb-2">System Health</p>
+                  <p className="text-3xl sm:text-4xl font-bold text-green-900">98.5%</p>
+                  <p className="text-xs sm:text-sm text-green-700 mt-2">Overall system performance</p>
+                </div>
+                <Activity className="h-10 w-10 sm:h-12 sm:w-12 text-green-600 opacity-80 ml-4" />
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 sm:p-8 border border-purple-200 hover:shadow-lg transition-shadow duration-300 sm:col-span-2 lg:col-span-1">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-base sm:text-lg font-semibold text-purple-900 mb-2">Data Analytics</p>
+                  <p className="text-3xl sm:text-4xl font-bold text-purple-900">2.4 TB</p>
+                  <p className="text-xs sm:text-sm text-purple-700 mt-2">Processed this month</p>
+                </div>
+                <Cpu className="h-10 w-10 sm:h-12 sm:w-12 text-purple-600 opacity-80 ml-4" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  )
+}

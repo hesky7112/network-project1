@@ -1,0 +1,45 @@
+
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+main
+server
+temp
+test_build
+backend.pid
+
+# Logs
+*.log
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment
+.env
+.env.local
+
+# Node
+node_modules/
+dist/
+build/
+.next/
+.nuxt/
+out/
+coverage/
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/

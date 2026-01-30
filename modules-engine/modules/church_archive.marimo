@@ -1,0 +1,5 @@
+import marimo as mo
+
+mo.md("# Church Archive Digitizer placeholder")
+church = mo.ui.text(label="Church Name")
+mo.md(f"Archiving system for {church.value} initiated.")

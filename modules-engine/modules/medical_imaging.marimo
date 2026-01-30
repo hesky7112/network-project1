@@ -1,0 +1,5 @@
+import marimo as mo
+
+mo.md("# Medical Imaging Analyzer placeholder")
+scan = mo.ui.file_upload(label="Upload Scan")
+mo.md(f"Scan uploaded: {scan.name if scan.value else 'None'}")

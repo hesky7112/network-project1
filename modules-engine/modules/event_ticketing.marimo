@@ -1,0 +1,5 @@
+import marimo as mo
+
+mo.md("# Event Ticketing placeholder")
+event = mo.ui.text(label="Event Name")
+mo.md(f"Ticketing system for {event.value} active.")

@@ -1,0 +1,70 @@
+{
+    "id": "kra-itax-autofiler",
+    "name": "KRA iTax Auto-Filer",
+    "version": "1.0.0",
+    "description": "Automatically populate and submit VAT, PAYE, and income tax returns to KRA.",
+    "category": "compliance",
+    "tags": [
+        "tax",
+        "kra",
+        "compliance",
+        "kenya",
+        "automation"
+    ],
+    "execution_mode": "server",
+    "primitives": [
+        {
+            "module": "DataIngestion",
+            "method": "fetch_kra_data",
+            "config": {}
+        },
+        {
+            "module": "ComplianceEngine",
+            "method": "validate_kra_compliance",
+            "config": {}
+        },
+        {
+            "module": "ReportGeneration",
+            "method": "generate_pdf",
+            "config": {
+                "template": "tax_return",
+                "title": "VAT/PAYE Draft Return"
+            }
+        }
+    ],
+    "ui": {
+        "form_fields": [
+            {
+                "name": "pin",
+                "type": "text",
+                "label": "KRA PIN",
+                "required": true
+            },
+            {
+                "name": "period",
+                "type": "text",
+                "label": "Tax Period (MM/YYYY)",
+                "required": true
+            }
+        ],
+        "output_type": "dashboard"
+    },
+    "pricing": {
+        "license_type": "lease",
+        "price": 79,
+        "currency": "USD"
+    },
+    "requirements": {
+        "requires_hal": false,
+        "requires_gpu": false,
+        "python_packages": [
+            "requests",
+            "pandas"
+        ],
+        "wasm_compatible": false
+    },
+    "author": {
+        "name": "AlienNet",
+        "organization": "AlienNet Ltd"
+    }
+}

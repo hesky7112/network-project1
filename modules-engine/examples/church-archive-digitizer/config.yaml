@@ -1,0 +1,27 @@
+# Church Archive Digitizer Configuration
+
+# OCR Settings
+ocr:
+  size: gundam
+  local_only: true
+  language: en
+
+# Report Template Settings
+report:
+  template: church_ledger
+  page_size: A4
+  include_table_of_contents: true
+  include_summary: true
+
+# Output Settings
+output:
+  format: pdf
+  include_original_images: false
+  compress: true
+
+# Processing Options
+processing:
+  extract_tables: true
+  extract_dates: true
+  extract_amounts: true
+  extract_names: true
