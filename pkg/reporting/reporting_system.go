@@ -5,6 +5,15 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/johnfercher/maroto/v2"
+	"github.com/johnfercher/maroto/v2/pkg/components/col"
+	"github.com/johnfercher/maroto/v2/pkg/components/line"
+	"github.com/johnfercher/maroto/v2/pkg/components/row"
+	"github.com/johnfercher/maroto/v2/pkg/components/text"
+	"github.com/johnfercher/maroto/v2/pkg/config"
+	"github.com/johnfercher/maroto/v2/pkg/consts/align"
+	"github.com/johnfercher/maroto/v2/pkg/consts/fontstyle"
+	"github.com/johnfercher/maroto/v2/pkg/props"
 	"gorm.io/gorm"
 )
 
@@ -15,44 +24,44 @@ type ReportingSystem struct {
 
 // Report represents a generated report
 type Report struct {
-	ID          uint      `json:"id" gorm:"primaryKey"`
-	Title       string    `json:"title"`
-	Type        string    `json:"type"` // incident, performance, security, compliance, custom
-	Category    string    `json:"category"` // network, system, security, health
-	CreatedBy   uint      `json:"created_by"`
-	CreatorName string    `json:"creator_name"`
-	CreatedAt   time.Time `json:"created_at"`
-	TimeRange   string    `json:"time_range"` // last_hour, last_day, last_week, last_month, custom
-	StartDate   *time.Time `json:"start_date"`
-	EndDate     *time.Time `json:"end_date"`
-	Status      string    `json:"status"` // draft, published, archived
-	Priority    string    `json:"priority"` // low, medium, high, critical
-	Tags        string    `json:"tags" gorm:"type:jsonb"`
-	Summary     string    `json:"summary"`
-	Findings    string    `json:"findings" gorm:"type:jsonb"`
-	Metrics     string    `json:"metrics" gorm:"type:jsonb"`
-	Charts      string    `json:"charts" gorm:"type:jsonb"`
-	Recommendations string `json:"recommendations" gorm:"type:jsonb"`
-	Attachments string    `json:"attachments" gorm:"type:jsonb"`
-	SharedWith  string    `json:"shared_with" gorm:"type:jsonb"`
-	ViewCount   int       `json:"view_count"`
-	ExportedAt  *time.Time `json:"exported_at"`
+	ID              uint       `json:"id" gorm:"primaryKey"`
+	Title           string     `json:"title"`
+	Type            string     `json:"type"`     // incident, performance, security, compliance, custom
+	Category        string     `json:"category"` // network, system, security, health
+	CreatedBy       uint       `json:"created_by"`
+	CreatorName     string     `json:"creator_name"`
+	CreatedAt       time.Time  `json:"created_at"`
+	TimeRange       string     `json:"time_range"` // last_hour, last_day, last_week, last_month, custom
+	StartDate       *time.Time `json:"start_date"`
+	EndDate         *time.Time `json:"end_date"`
+	Status          string     `json:"status"`   // draft, published, archived
+	Priority        string     `json:"priority"` // low, medium, high, critical
+	Tags            string     `json:"tags" gorm:"type:jsonb"`
+	Summary         string     `json:"summary"`
+	Findings        string     `json:"findings" gorm:"type:jsonb"`
+	Metrics         string     `json:"metrics" gorm:"type:jsonb"`
+	Charts          string     `json:"charts" gorm:"type:jsonb"`
+	Recommendations string     `json:"recommendations" gorm:"type:jsonb"`
+	Attachments     string     `json:"attachments" gorm:"type:jsonb"`
+	SharedWith      string     `json:"shared_with" gorm:"type:jsonb"`
+	ViewCount       int        `json:"view_count"`
+	ExportedAt      *time.Time `json:"exported_at"`
 }
 
 // Finding represents a report finding
 type Finding struct {
-	ID          int       `json:"id"`
-	Type        string    `json:"type"` // issue, observation, improvement, success
-	Severity    string    `json:"severity"` // critical, high, medium, low, info
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	Evidence    []string  `json:"evidence"`
-	Impact      string    `json:"impact"`
-	Recommendation string `json:"recommendation"`
-	Status      string    `json:"status"` // open, acknowledged, resolved
-	AssignedTo  *uint     `json:"assigned_to"`
-	CreatedAt   time.Time `json:"created_at"`
-	ResolvedAt  *time.Time `json:"resolved_at"`
+	ID             int        `json:"id"`
+	Type           string     `json:"type"`     // issue, observation, improvement, success
+	Severity       string     `json:"severity"` // critical, high, medium, low, info
+	Title          string     `json:"title"`
+	Description    string     `json:"description"`
+	Evidence       []string   `json:"evidence"`
+	Impact         string     `json:"impact"`
+	Recommendation string     `json:"recommendation"`
+	Status         string     `json:"status"` // open, acknowledged, resolved
+	AssignedTo     *uint      `json:"assigned_to"`
+	CreatedAt      time.Time  `json:"created_at"`
+	ResolvedAt     *time.Time `json:"resolved_at"`
 }
 
 // ReportTemplate represents a report template
@@ -75,7 +84,7 @@ type ReportMetric struct {
 	Name        string      `json:"name"`
 	Value       interface{} `json:"value"`
 	Unit        string      `json:"unit"`
-	Trend       string      `json:"trend"` // up, down, stable
+	Trend       string      `json:"trend"`  // up, down, stable
 	Change      float64     `json:"change"` // percentage change
 	Threshold   float64     `json:"threshold"`
 	Status      string      `json:"status"` // good, warning, critical
@@ -235,7 +244,7 @@ func (rs *ReportingSystem) AddFinding(reportID uint, finding Finding) error {
 
 	var findings []Finding
 	json.Unmarshal([]byte(report.Findings), &findings)
-	
+
 	finding.ID = len(findings) + 1
 	finding.CreatedAt = time.Now()
 	findings = append(findings, finding)
@@ -279,11 +288,155 @@ func (rs *ReportingSystem) ExportReport(reportID uint, format string) ([]byte, e
 	case "json":
 		return json.MarshalIndent(report, "", "  ")
 	case "pdf":
-		// In production, generate PDF
-		return []byte("PDF export not implemented"), nil
+		return rs.generatePDF(report)
 	default:
 		return json.Marshal(report)
 	}
+}
+
+func (rs *ReportingSystem) generatePDF(report Report) ([]byte, error) {
+	cfg := config.NewBuilder().
+		WithPageNumber().
+		WithLeftMargin(15).
+		WithRightMargin(15).
+		WithTopMargin(15).
+		Build()
+
+	m := maroto.New(cfg)
+
+	// --- Header ---
+	m.AddRows(row.New(20).Add(
+		col.New(12).Add(
+			text.New(report.Title, props.Text{
+				Size:  22,
+				Style: fontstyle.Bold,
+				Align: align.Center,
+				Color: &props.Color{Red: 0, Green: 255, Blue: 65}, // Alien Green
+			}),
+		),
+	))
+
+	m.AddRows(row.New(10).Add(
+		col.New(12).Add(
+			text.New(fmt.Sprintf("Type: %s | Category: %s | Priority: %s", report.Type, report.Category, report.Priority), props.Text{
+				Size:  10,
+				Style: fontstyle.Italic,
+				Align: align.Center,
+			}),
+		),
+	))
+
+	m.AddRows(line.NewRow(1))
+
+	// --- Executive Summary ---
+	m.AddRows(row.New(15).Add(
+		col.New(12).Add(
+			text.New("Executive Summary", props.Text{
+				Size:  14,
+				Style: fontstyle.Bold,
+				Top:   5,
+			}),
+		),
+	))
+
+	m.AddRows(row.New(20).Add(
+		col.New(12).Add(
+			text.New(report.Summary, props.Text{
+				Size: 10,
+			}),
+		),
+	))
+
+	// --- Metrics ---
+	var metrics []ReportMetric
+	if err := json.Unmarshal([]byte(report.Metrics), &metrics); err == nil && len(metrics) > 0 {
+		m.AddRows(row.New(15).Add(
+			col.New(12).Add(
+				text.New("Key Performance Indicators", props.Text{
+					Size:  14,
+					Style: fontstyle.Bold,
+					Top:   5,
+				}),
+			),
+		))
+
+		for _, metric := range metrics {
+			m.AddRows(row.New(10).Add(
+				col.New(4).Add(text.New(metric.Name, props.Text{Size: 9, Style: fontstyle.Bold})),
+				col.New(4).Add(text.New(fmt.Sprintf("%v %s", metric.Value, metric.Unit), props.Text{Size: 9})),
+				col.New(4).Add(text.New(fmt.Sprintf("Status: %s", metric.Status), props.Text{Size: 9})),
+			))
+		}
+	}
+
+	// --- Findings ---
+	var findings []Finding
+	if err := json.Unmarshal([]byte(report.Findings), &findings); err == nil && len(findings) > 0 {
+		m.AddRows(row.New(15).Add(
+			col.New(12).Add(
+				text.New("Critical Findings", props.Text{
+					Size:  14,
+					Style: fontstyle.Bold,
+					Top:   5,
+				}),
+			),
+		))
+
+		for _, finding := range findings {
+			m.AddRows(row.New(12).Add(
+				col.New(12).Add(
+					text.New(fmt.Sprintf("[%s] %s", finding.Severity, finding.Title), props.Text{
+						Size:  10,
+						Style: fontstyle.Bold,
+						Top:   2,
+					}),
+				),
+			))
+			m.AddRows(row.New(15).Add(
+				col.New(12).Add(
+					text.New(finding.Description, props.Text{Size: 9}),
+				),
+			))
+		}
+	}
+
+	// --- Recommendations ---
+	var recommendations []string
+	if err := json.Unmarshal([]byte(report.Recommendations), &recommendations); err == nil && len(recommendations) > 0 {
+		m.AddRows(row.New(15).Add(
+			col.New(12).Add(
+				text.New("Strategic Recommendations", props.Text{
+					Size:  14,
+					Style: fontstyle.Bold,
+					Top:   5,
+				}),
+			),
+		))
+
+		for _, rec := range recommendations {
+			m.AddRows(row.New(8).Add(
+				col.New(12).Add(text.New("- "+rec, props.Text{Size: 9})),
+			))
+		}
+	}
+
+	// --- Footer ---
+	m.AddRows(row.New(20).Add(
+		col.New(12).Add(
+			text.New(fmt.Sprintf("Generated by %s on %s", report.CreatorName, time.Now().Format(time.RFC822)), props.Text{
+				Size:  8,
+				Align: align.Center,
+				Top:   10,
+			}),
+		),
+	))
+
+	document, err := m.Generate()
+	if err != nil {
+		return nil, err
+	}
+
+	return document.GetBytes(), nil
 }
 
 // GetReportsByUser retrieves reports created by a user

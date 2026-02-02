@@ -25,6 +25,7 @@ export {
   TrendingUp,
   TrendingDown,
   Clock,
+  History,
   Wifi,
   Globe,
   Cpu,

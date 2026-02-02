@@ -117,7 +117,7 @@ export default function Profile() {
                     {[
                       { icon: GitBranch, title: "Dijkstra Master", desc: "Resolved 50+ topological deadlocks." },
                       { icon: Activity, title: "Packet Sniffer", desc: "Analyzed 1TB+ of flow telemetry." },
-                      { icon: Shield, title: "Vault Guardian", desc: "Zero security breaches in 365 days." }
+                      { icon: Shield, title: "Security Specialist", desc: "Zero security breaches in 365 days." }
                     ].map((award, i) => (
                       <div key={i} className="flex gap-4">
                         <award.icon className="w-5 h-5 text-alien-green shrink-0" />

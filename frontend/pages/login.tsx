@@ -42,7 +42,7 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-[#000000] text-slate-400 flex items-center justify-center p-6 font-sans overflow-hidden">
       <Head>
-        <title>Access Gateway | Alien Net</title>
+        <title>Access Gateway | Network Solutions</title>
       </Head>
 
       <div className="fixed inset-0 pointer-events-none opacity-10">

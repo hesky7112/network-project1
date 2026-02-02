@@ -28,6 +28,7 @@ import {
   ShoppingCart,
   Wallet,
   Upload,
+  History,
 } from '@/components/icons'
 import { cn } from '@/lib/utils'
 import { Logo } from './logo'
@@ -71,6 +72,7 @@ const adminNavigation = [
   { name: 'Scheduled_Tasks', href: '/admin/tasks', icon: List },
   { name: 'GIS_Mapping', href: '/admin/gis', icon: Search },
   { name: 'Monetization_Ctrl', href: '/admin/monetization', icon: Wallet },
+  { name: 'Audit_Registry', href: '/admin/audit', icon: History },
   { name: 'System_Settings', href: '/admin/settings', icon: Settings },
 ]
 

@@ -5,11 +5,15 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
 	"networking-main/internal/models"
+	"networking-main/pkg/logger"
 	"networking-main/pkg/netconfig"
+
+	"go.uber.org/zap"
 
 	"gorm.io/gorm"
 )
@@ -35,16 +39,16 @@ type DeviceRegistration struct {
 
 // ProvisioningResponse represents the response to a device registration
 type ProvisioningResponse struct {
-	Success      bool   `json:"success"`
-	Message      string `json:"message"`
-	IPAddress    string `json:"ip_address"`
-	Hostname     string `json:"hostname"`
-	VLANID       int    `json:"vlan_id"`
-	Gateway      string `json:"gateway"`
+	Success      bool     `json:"success"`
+	Message      string   `json:"message"`
+	IPAddress    string   `json:"ip_address"`
+	Hostname     string   `json:"hostname"`
+	VLANID       int      `json:"vlan_id"`
+	Gateway      string   `json:"gateway"`
 	DNSServers   []string `json:"dns_servers"`
 	NTPServers   []string `json:"ntp_servers"`
-	ConfigURL    string `json:"config_url"`
-	ConfigScript string `json:"config_script,omitempty"`
+	ConfigURL    string   `json:"config_url"`
+	ConfigScript string   `json:"config_script,omitempty"`
 }
 
 // NewZTPListener creates a new ZTP listener
@@ -60,7 +64,7 @@ func NewZTPListener(db *gorm.DB, port int) *ZTPListener {
 // Start starts the ZTP HTTP server
 func (zl *ZTPListener) Start() error {
 	mux := http.NewServeMux()
-	
+
 	// ZTP endpoints
 	mux.HandleFunc("/ztp/register", zl.HandleDeviceRegistration)
 	mux.HandleFunc("/ztp/config/", zl.HandleConfigDownload)
@@ -74,7 +78,7 @@ func (zl *ZTPListener) Start() error {
 		WriteTimeout: 30 * time.Second,
 	}
 
-	fmt.Printf("ZTP Listener started on port %d\n", zl.port)
+	logger.Info("ZTP Listener started", zap.Int("port", zl.port))
 	return zl.httpServer.ListenAndServe()
 }
 
@@ -108,7 +112,7 @@ func (zl *ZTPListener) HandleDeviceRegistration(w http.ResponseWriter, r *http.R
 	// Check if device already exists
 	var existingDevice models.Device
 	result := zl.db.Where("serial_number = ? OR mac_address = ?", reg.SerialNumber, reg.MACAddress).First(&existingDevice)
-	
+
 	if result.Error == nil {
 		// Device already registered
 		response := zl.buildProvisioningResponse(&existingDevice)
@@ -168,7 +172,10 @@ func (zl *ZTPListener) HandleDeviceRegistration(w http.ResponseWriter, r *http.R
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 
-	fmt.Printf("ZTP: Registered device %s (SN: %s, MAC: %s)\n", device.Hostname, reg.SerialNumber, reg.MACAddress)
+	logger.Info("ZTP: Registered device",
+		zap.String("hostname", device.Hostname),
+		zap.String("serial", reg.SerialNumber),
+		zap.String("mac", reg.MACAddress))
 }
 
 // HandleConfigDownload serves the initial configuration for a device
@@ -194,7 +201,7 @@ func (zl *ZTPListener) HandleConfigDownload(w http.ResponseWriter, r *http.Reque
 	w.Header().Set("Content-Type", "text/plain")
 	w.Write([]byte(config))
 
-	fmt.Printf("ZTP: Served config for device %s\n", device.Hostname)
+	logger.Info("ZTP: Served config", zap.String("hostname", device.Hostname))
 }
 
 // HandleProvisioningStatus returns the provisioning status of a device
@@ -259,7 +266,10 @@ func (zl *ZTPListener) HandleProvisioningCallback(w http.ResponseWriter, r *http
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 
-	fmt.Printf("ZTP: Device %d callback - Status: %s, Message: %s\n", callback.DeviceID, callback.Status, callback.Message)
+	logger.Info("ZTP: Device callback",
+		zap.Uint("device_id", callback.DeviceID),
+		zap.String("status", callback.Status),
+		zap.String("message", callback.Message))
 }
 
 // AssignIP assigns an IP address to a device
@@ -277,8 +287,8 @@ func (zl *ZTPListener) AssignVLAN(device *models.Device) (int, error) {
 		return 10, nil // Management VLAN
 	} else if strings.Contains(strings.ToLower(device.DeviceType), "router") {
 		return 20, nil // Router VLAN
-	} else if strings.Contains(strings.ToLower(device.DeviceType), "ap") || 
-	          strings.Contains(strings.ToLower(device.DeviceType), "wireless") {
+	} else if strings.Contains(strings.ToLower(device.DeviceType), "ap") ||
+		strings.Contains(strings.ToLower(device.DeviceType), "wireless") {
 		return 30, nil // Wireless VLAN
 	}
 
@@ -314,7 +324,9 @@ func (zl *ZTPListener) PushInitialConfig(device *models.Device) error {
 	time.Sleep(10 * time.Second)
 
 	// In production, push config via SSH or API
-	fmt.Printf("ZTP: Pushing initial config to %s (%s)\n", device.Hostname, device.IPAddress)
+	logger.Info("ZTP: Pushing initial config",
+		zap.String("hostname", device.Hostname),
+		zap.String("ip", device.IPAddress))
 
 	// Update device status
 	zl.db.Model(device).Updates(map[string]interface{}{
@@ -339,14 +351,14 @@ interface Management1
 !
 ip route 0.0.0.0 0.0.0.0 %s
 !
-ntp server pool.ntp.org
+ntp server %s
 !
 snmp-server community public RO
 snmp-server location Site-01
 snmp-server contact admin@example.com
 !
 end
-`, device.Hostname, time.Now().Format(time.RFC3339), device.Hostname, device.IPAddress, zl.ipamManager.GetGateway(100))
+`, device.Hostname, time.Now().Format(time.RFC3339), device.Hostname, device.IPAddress, zl.ipamManager.GetGateway(100), strings.Join(zl.getNTPServers(), " "))
 
 	return config
 }
@@ -383,4 +395,22 @@ func (zl *ZTPListener) getServerIP() string {
 	}
 
 	return "localhost"
+}
+
+// getDNSServers returns DNS servers from environment or defaults
+func (zl *ZTPListener) getDNSServers() []string {
+	dns := os.Getenv("ZTP_DNS_SERVERS")
+	if dns == "" {
+		return []string{"8.8.8.8", "8.8.4.4"}
+	}
+	return strings.Split(dns, ",")
+}
+
+// getNTPServers returns NTP servers from environment or defaults
+func (zl *ZTPListener) getNTPServers() []string {
+	ntp := os.Getenv("ZTP_NTP_SERVERS")
+	if ntp == "" {
+		return []string{"pool.ntp.org"}
+	}
+	return strings.Split(ntp, ",")
 }

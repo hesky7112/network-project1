@@ -28,6 +28,7 @@ func SetupCompleteRoutes(router *gin.Engine, apiHandlers *handlers.APIHandlers, 
 		authGroup.POST("/register", apiHandlers.Register)
 		authGroup.POST("/forgot-password", apiHandlers.ForgotPassword)
 		authGroup.POST("/reset-password", apiHandlers.ResetPassword)
+		authGroup.GET("/roles", apiHandlers.ListPublicRoles)
 		authGroup.GET("/me", apiHandlers.JWTMiddleware(), apiHandlers.GetCurrentUser)
 	}
 

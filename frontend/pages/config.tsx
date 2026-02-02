@@ -94,7 +94,7 @@ export default function Configuration() {
   }
 
   return (
-    <Layout title="Config_Nexus_Prime">
+    <Layout title="Configuration Manager">
       <div className="min-h-screen bg-[#050505] text-slate-300 p-4 sm:p-8 space-y-8 relative overflow-hidden">
         {/* Background Visual Flair */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-stardust-violet/5 blur-[120px] rounded-full pointer-events-none" />
@@ -109,7 +109,7 @@ export default function Configuration() {
                   <Settings className="h-6 w-6 text-earth-green" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-black text-white uppercase tracking-tighter italic leading-none">Config_Nexus_Prime</h1>
+                  <h1 className="text-3xl font-black text-white uppercase tracking-tighter italic leading-none">Configuration Manager</h1>
                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mt-2">Core_Heuristic_Parameter_Synchronization</p>
                 </div>
               </div>

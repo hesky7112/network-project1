@@ -88,7 +88,7 @@ export default function Wallet() {
     return (
         <div className="min-h-screen bg-oled-black text-slate-400 font-sans uppercase">
             <Head>
-                <title>Sovereign Wallet | Alien Net</title>
+                <title>Sovereign Wallet | Network Solutions</title>
             </Head>
 
             <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-oled-black/80 backdrop-blur-md">
@@ -97,7 +97,7 @@ export default function Wallet() {
                         <div className="w-8 h-8 bg-gradient-to-br from-cosmic-red to-orange-500 flex items-center justify-center shadow-[0_0_15px_rgba(255,77,0,0.3)]" style={{ borderRadius: '2px' }}>
                             <Zap className="w-5 h-5 text-black" />
                         </div>
-                        <span className="text-xl font-bold tracking-tighter text-white uppercase italic">Alien Net</span>
+                        <span className="text-xl font-bold tracking-tighter text-white uppercase italic">Network Solutions</span>
                         <span className="text-[10px] font-black text-slate-600 ml-2 tracking-[0.3em] hidden sm:inline">// WALLET_RELAY</span>
                     </div>
 
@@ -181,7 +181,7 @@ export default function Wallet() {
                                 <h4 className="text-[10px] font-black uppercase tracking-widest text-white">Daraja_STK_Relay</h4>
                             </div>
                             <p className="text-[10px] text-slate-500 font-bold leading-relaxed uppercase">
-                                Initiate immediate credit injection via Safaricom M-PESA. Transactions are verified on the Alien Net Kernel.
+                                Initiate immediate credit injection via Safaricom M-PESA. Transactions are verified on the Network Core.
                             </p>
                             <div className="space-y-4">
                                 <div className="space-y-2">

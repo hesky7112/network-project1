@@ -13,6 +13,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 type Role = {
     id: number;
+    parent_id?: number | null;
     name: string;
     description: string;
     level: number;
@@ -35,6 +36,7 @@ export default function RolesManagement() {
     const [roleName, setRoleName] = useState("");
     const [roleDesc, setRoleDesc] = useState("");
     const [rolePerms, setRolePerms] = useState<Record<string, string[]>>({});
+    const [roleParent, setRoleParent] = useState<number | null>(null);
 
     const queryClient = useQueryClient();
 
@@ -83,6 +85,7 @@ export default function RolesManagement() {
     const handleSaveRole = () => {
         const payload = {
             id: editingRole?.id,
+            parent_id: roleParent,
             name: roleName,
             description: roleDesc,
             permissions: JSON.stringify(rolePerms),
@@ -106,6 +109,7 @@ export default function RolesManagement() {
         setRoleName("");
         setRoleDesc("");
         setRolePerms({});
+        setRoleParent(null);
     };
 
     const columns: ColumnDef<Role>[] = [
@@ -116,7 +120,10 @@ export default function RolesManagement() {
                 <div className="flex items-center gap-3">
                     <div className={cn(
                         "w-8 h-8 flex items-center justify-center border",
-                        row.original.level <= 4 ? "border-earth-green/30 bg-earth-green/10 text-earth-green" : "border-stardust-violet/30 bg-stardust-violet/10 text-stardust-violet"
+                        row.original.level === 1 ? "border-earth-green/30 bg-earth-green/10 text-earth-green" :
+                            row.original.level === 2 ? "border-blue-400/30 bg-blue-400/10 text-blue-400" :
+                                row.original.level === 3 ? "border-amber-500/30 bg-amber-500/10 text-amber-500" :
+                                    "border-stardust-violet/30 bg-stardust-violet/10 text-stardust-violet"
                     )} style={{ borderRadius: '1.5px' }}>
                         <Shield className="h-4 w-4" />
                     </div>
@@ -147,6 +154,7 @@ export default function RolesManagement() {
                             setRoleName(row.original.name);
                             setRoleDesc(row.original.description);
                             setRolePerms(JSON.parse(row.original.permissions || '{}'));
+                            setRoleParent(row.original.parent_id || null);
                             setIsModalOpen(true);
                         }}
                     >
@@ -293,6 +301,25 @@ export default function RolesManagement() {
                                         />
                                     </StaggerItem>
                                 </StaggerList>
+
+                                <StaggerItem className="space-y-3">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] italic ml-1">Inherit_Parent_Permissions (Hierarchical RBAC)</label>
+                                    <select
+                                        value={roleParent || ""}
+                                        onChange={e => setRoleParent(e.target.value ? Number(e.target.value) : null)}
+                                        className="w-full bg-[#050505] border border-white/10 p-5 text-[11px] font-black uppercase text-white tracking-widest focus:outline-none focus:border-stardust-violet/40 transition-all rounded-sm italic"
+                                    >
+                                        <option value="">L_00 (NO_INHERITANCE)</option>
+                                        {roles.filter((r: Role) => r.id !== editingRole?.id).map((r: Role) => (
+                                            <option key={r.id} value={r.id} className="bg-[#0a0a0c]">
+                                                L_0{r.level} ({r.name.toUpperCase()})
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <p className="text-[9px] font-bold text-earth-green/60 uppercase tracking-widest italic ml-1 mt-2">
+                                        * Selected tier will automatically cascade permissions to this role.
+                                    </p>
+                                </StaggerItem>
 
                                 <StaggerList className="space-y-6">
                                     <div className="flex items-center gap-3 mb-2 ml-1">

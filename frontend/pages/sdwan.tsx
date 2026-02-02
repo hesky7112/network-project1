@@ -67,7 +67,7 @@ export default function SDWAN() {
     return (
         <Layout title="SD-WAN Manager">
             <Head>
-                <title>SD-WAN | Alien Net</title>
+                <title>SD-WAN | Network Solutions</title>
             </Head>
 
             <div className="space-y-6">

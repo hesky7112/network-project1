@@ -60,8 +60,8 @@ export default function TechStack() {
     return (
         <div className="min-h-screen bg-[#000000] text-slate-400 selection:bg-alien-green/30 selection:text-alien-green font-sans uppercase">
             <Head>
-                <title>Tech_Stack // Alien Net Architecture</title>
-                <meta name="description" content="Technical specifications and internal architecture of the Alien Net system." />
+                <title>Tech_Stack // Network Solutions Architecture</title>
+                <meta name="description" content="Technical specifications and internal architecture of the Network Solutions system." />
             </Head>
 
             {/* Technical Grid Overlay */}
@@ -75,7 +75,7 @@ export default function TechStack() {
                         <div className="w-8 h-8 bg-alien-green flex items-center justify-center shadow-[0_0_15px_rgba(0,255,65,0.3)]" style={{ borderRadius: '2px' }}>
                             <Zap className="w-5 h-5 text-black" />
                         </div>
-                        <span className="text-xl font-bold tracking-tighter text-white uppercase">Alien Net</span>
+                        <span className="text-xl font-bold tracking-tighter text-white uppercase">Network Solutions</span>
                     </div>
                     <Button
                         variant="outline"
@@ -153,7 +153,7 @@ export default function TechStack() {
             </main>
 
             <footer className="py-20 border-t border-white/5 text-center">
-                <span className="text-[9px] font-mono text-slate-800 uppercase tracking-[0.6em]">© 2026 ALIEN_NET_ARCHITECTURE_GROUP</span>
+                <span className="text-[9px] font-mono text-slate-800 uppercase tracking-[0.6em]">© 2026 NETWORK_SOLUTIONS_GROUP</span>
             </footer>
         </div>
     );

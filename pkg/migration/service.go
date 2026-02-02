@@ -5,10 +5,15 @@ import (
 	"fmt"
 	"networking-main/pkg/provisioning"
 	"sync"
-	"time"
 
 	"gorm.io/gorm"
 )
+
+// Migrator defines the interface for different migration source types (CSV, API, etc.)
+type Migrator interface {
+	Migrate(ctx context.Context, job *JobStatus, config map[string]interface{}) error
+	GetName() string
+}
 
 type JobStatus struct {
 	ID           string `json:"id"`
@@ -19,24 +24,59 @@ type JobStatus struct {
 	FailureCount int    `json:"failure_count"`
 	Source       string `json:"source"`
 	ErrorLog     string `json:"error_log"`
+	mu           sync.Mutex
+}
+
+func (j *JobStatus) UpdateProgress(progress, success, failure int) {
+	j.mu.Lock()
+	defer j.mu.Unlock()
+	j.Progress = progress
+	j.SuccessCount = success
+	j.FailureCount = failure
+}
+
+func (j *JobStatus) LogError(err string) {
+	j.mu.Lock()
+	defer j.mu.Unlock()
+	if j.ErrorLog != "" {
+		j.ErrorLog += "\n"
+	}
+	j.ErrorLog += err
 }
 
 type Service struct {
 	db           *gorm.DB
 	provisioning *provisioning.Service
 	jobs         map[string]*JobStatus
+	migrators    map[string]Migrator
 	mu           sync.RWMutex
 }
 
 func NewService(db *gorm.DB, prov *provisioning.Service) *Service {
-	return &Service{
+	s := &Service{
 		db:           db,
 		provisioning: prov,
 		jobs:         make(map[string]*JobStatus),
+		migrators:    make(map[string]Migrator),
 	}
+	return s
+}
+
+func (s *Service) RegisterMigrator(name string, m Migrator) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.migrators[name] = m
 }
 
 func (s *Service) StartMigration(ctx context.Context, sourceType string, config map[string]interface{}) (string, error) {
+	s.mu.RLock()
+	migrator, ok := s.migrators[sourceType]
+	s.mu.RUnlock()
+
+	if !ok {
+		return "", fmt.Errorf("migrator for source type %s not registered", sourceType)
+	}
+
 	s.mu.Lock()
 	jobID := fmt.Sprintf("job_%d", len(s.jobs)+1)
 	job := &JobStatus{
@@ -48,7 +88,17 @@ func (s *Service) StartMigration(ctx context.Context, sourceType string, config 
 	s.mu.Unlock()
 
 	// Run migration in background
-	go s.runMigration(jobID, sourceType, config)
+	go func() {
+		err := migrator.Migrate(ctx, job, config)
+		s.mu.Lock()
+		defer s.mu.Unlock()
+		if err != nil {
+			job.Status = "failed"
+			job.LogError(err.Error())
+		} else {
+			job.Status = "completed"
+		}
+	}()
 
 	return jobID, nil
 }
@@ -58,33 +108,4 @@ func (s *Service) GetJobStatus(jobID string) (*JobStatus, bool) {
 	defer s.mu.RUnlock()
 	job, ok := s.jobs[jobID]
 	return job, ok
-}
-
-func (s *Service) runMigration(jobID string, _ string, _ map[string]interface{}) {
-	// Simulated migration logic
-	// In real production, this would parse CSV or call Mikrotik API
-	total := 100
-
-	s.mu.Lock()
-	if job, ok := s.jobs[jobID]; ok {
-		job.Total = total
-	}
-	s.mu.Unlock()
-
-	for i := 1; i <= total; i++ {
-		time.Sleep(50 * time.Millisecond) // Simulate work
-
-		s.mu.Lock()
-		if job, ok := s.jobs[jobID]; ok {
-			job.Progress = (i * 100) / total
-			job.SuccessCount++
-		}
-		s.mu.Unlock()
-	}
-
-	s.mu.Lock()
-	if job, ok := s.jobs[jobID]; ok {
-		job.Status = "completed"
-	}
-	s.mu.Unlock()
 }

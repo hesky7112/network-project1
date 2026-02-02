@@ -59,15 +59,15 @@ const DataScienceWidget = () => (
       ))}
     </div>
     <div className="flex justify-between items-center text-[10px] font-black italic">
-      <span className="text-white uppercase tracking-tighter">Neural_Aggregator</span>
-      <span className="text-stardust-violet underline tracking-[0.2em]">SYNCHRONIZED</span>
+      <span className="text-white uppercase tracking-tighter">Data Aggregator</span>
+      <span className="text-stardust-violet underline tracking-[0.2em]">ACTIVE</span>
     </div>
   </div>
 )
 
 const InsightOscillator = () => (
   <div className="bg-[#050505] border border-white/5 p-4 space-y-4 h-full relative" style={{ borderRadius: '2px' }}>
-    <div className="text-[8px] font-black uppercase tracking-widest text-slate-500">Predictive_Matrix // Anomaly_Flux</div>
+    <div className="text-[8px] font-black uppercase tracking-widest text-slate-500">Trend Analysis // Traffic Anomalies</div>
     <div className="h-24 flex items-center justify-center">
       <svg viewBox="0 0 200 60" className="w-full h-full opacity-60">
         <motion.path
@@ -145,8 +145,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-oled-black text-slate-400 selection:bg-cosmic-red/30 selection:text-cosmic-red overflow-x-hidden font-sans">
       <Head>
-        <title>Alien Net | Professional Network Solutions</title>
-        <meta name="description" content="Enterprise-grade network management. Advanced AI Diagnostics, Network Mapping, and Traffic Inspection for administrators." />
+        <title>Network Solutions | Professional Network Solutions</title>
+        <meta name="description" content="Enterprise-grade network management. Professional Diagnostics, Network Mapping, and Traffic Inspection for administrators." />
       </Head>
 
       {/* Technical Grid Overlay */}
@@ -163,15 +163,15 @@ export default function Home() {
             <div className="w-8 h-8 bg-gradient-to-br from-cosmic-red to-orange-500 flex items-center justify-center shadow-[0_0_15px_rgba(255,77,0,0.3)]" style={{ borderRadius: '2px' }}>
               <Zap className="w-5 h-5 text-black" />
             </div>
-            <span className="text-xl font-bold tracking-tighter text-white uppercase italic">Alien Net</span>
+            <span className="text-xl font-bold tracking-tighter text-white uppercase italic">Network Solutions</span>
           </div>
 
-          <a href="#features" className="hover:text-cosmic-red transition-colors">Key_Features</a>
+          <a href="#features" className="hover:text-cosmic-red transition-colors">Key Features</a>
           <a href="/marketplace" className="hover:text-stardust-violet transition-colors font-black text-stardust-violet">Marketplace</a>
           <a href="/community" className="hover:text-earth-green transition-colors">Community</a>
           <a href="/pricing" className="hover:text-void-indigo transition-colors">Pricing</a>
           <a href="/docs" className="hover:text-slate-400 transition-colors">Documentation</a>
-          <a href="/tech" className="hover:text-slate-400 transition-colors">Tech_Stack</a>
+          <a href="/tech" className="hover:text-slate-400 transition-colors">Tech Stack</a>
 
           <div className="flex items-center gap-4">
             <Button
@@ -202,7 +202,7 @@ export default function Home() {
               className="inline-flex items-center gap-3 border-l-2 border-earth-green bg-earth-green/5 px-4 py-2 text-[10px] font-black uppercase tracking-[0.4em] text-earth-green mt-4"
             >
               <Activity className="w-3 h-3" />
-              Professional Management System // Localized
+              Professional Management System // Enterprise
             </motion.div>
 
             <motion.h1
@@ -210,8 +210,8 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               className="text-6xl lg:text-7xl font-black leading-[0.85] tracking-tighter text-white uppercase"
             >
-              Alien Net <br />
-              <span className="bg-gradient-to-r from-stardust-violet via-cosmic-red to-stardust-violet bg-clip-text text-transparent italic">SuperCompute Hub.</span>
+              Network Solutions <br />
+              <span className="bg-gradient-to-r from-stardust-violet via-cosmic-red to-stardust-violet bg-clip-text text-transparent italic">Analytics Hub.</span>
             </motion.h1>
 
             <motion.p
@@ -219,7 +219,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               className="text-lg text-slate-500 max-w-xl leading-relaxed font-bold uppercase tracking-tight"
             >
-              Enterprise-grade data science & network intelligence. Deploy ultra-high performance analytics engines powered by Polars, Apache Arrow, and Neural Workflows.
+              Enterprise-grade network monitoring & data analytics. Deploy high-performance reporting engines powered by industry-standard open source frameworks.
             </motion.p>
 
             <div className="flex flex-col sm:flex-row gap-6">
@@ -229,7 +229,7 @@ export default function Home() {
                 className="bg-gradient-to-r from-stardust-violet to-void-indigo text-white hover:opacity-90 h-16 px-12 font-black text-xs uppercase tracking-[0.2em]"
                 style={{ borderRadius: '1.5px' }}
               >
-                Launch Studio
+                Open Analytics
               </Button>
               <Button
                 size="lg"
@@ -253,8 +253,8 @@ export default function Home() {
               {/* Simulated Dashboard Header */}
               <div className="bg-[#000000] border-b border-white/5 px-6 py-4 flex justify-between items-center mb-1">
                 <div className="flex gap-2 text-[9px] font-black uppercase tracking-widest">
-                  <span className="text-white">Forge:</span>
-                  <span className="text-stardust-violet underline italic">SUPERCOMPUTE_ENGINE_v4</span>
+                  <span className="text-white">System:</span>
+                  <span className="text-stardust-violet underline italic">ANALYTICS_ENGINE_v4</span>
                 </div>
                 <div className="flex gap-4">
                   <div className="h-1.5 w-1.5 bg-stardust-violet rounded-full shadow-[0_0_8px_rgba(138,43,226,0.5)]" />
@@ -274,15 +274,15 @@ export default function Home() {
                   <TopologyWidget />
                 </div>
                 <div className="col-span-2 bg-[#050505] border border-white/5 p-4 relative overflow-hidden h-32">
-                  <div className="text-[8px] font-black uppercase tracking-widest text-slate-500 mb-2">Neural_Insight_Engine</div>
+                  <div className="text-[8px] font-black uppercase tracking-widest text-slate-500 mb-2">Analytics Engine</div>
                   <div className="space-y-2">
                     <div className="flex justify-between items-center text-[10px] font-bold">
-                      <span className="text-slate-600 italic">Predictive_Power</span>
-                      <span className="text-stardust-violet">Super_Charged</span>
+                      <span className="text-slate-600 italic">Processing Capacity</span>
+                      <span className="text-stardust-violet">High Priority</span>
                     </div>
                     <div className="text-xs text-white opacity-90 font-mono tracking-tighter">
-                      Ingesting 800k events/sec via Go-Ingest. <br />
-                      <span className="text-earth-green">Status: Processing_Optimized_via_Apache_Arrow</span>
+                      Capturing 800k events/sec. <br />
+                      <span className="text-earth-green">Status: Optimized Performance</span>
                     </div>
                   </div>
                   <div className="absolute top-0 right-0 w-24 h-full bg-stardust-violet/10 blur-2xl" />
@@ -301,20 +301,20 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-6 relative z-10 grid lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-8">
               <div className="inline-flex items-center gap-3 px-4 py-2 bg-stardust-violet/10 border border-stardust-violet/20 text-stardust-violet text-[10px] font-black uppercase tracking-[0.5em]">
-                <Zap className="w-4 h-4" /> The_Super_Engine
+                <Zap className="w-4 h-4" /> The Analytics Engine
               </div>
               <h2 className="text-6xl lg:text-8xl font-black text-white uppercase tracking-tighter italic leading-[0.85]">
-                SuperCompute <br />
+                Network <br />
                 <span className="underline decoration-stardust-violet underline-offset-8">Intelligence.</span>
               </h2>
               <p className="text-lg text-slate-500 font-bold leading-relaxed max-w-xl italic uppercase tracking-tight">
-                Stop waiting for slow queries. Our backend leverages Polars, the fastest DataFrame engine in the world, coupled with Go's high-concurrency ingestion. Transform billions of rows into insights in milliseconds.
+                Stop waiting for slow reports. Our backend leverages industry-standard data processing, coupled with Go's high-concurrency ingestion. Transform millions of rows into insights in milliseconds.
               </p>
 
               <div className="grid grid-cols-2 gap-6 pt-6">
                 {[
-                  { label: 'Data_Throughput', val: '40GB/s', sub: 'Polars Native' },
-                  { label: 'Neural_Memory', val: '80% Less', sub: 'Apache Arrow' },
+                  { label: 'Data Throughput', val: '40GB/s', sub: 'Native Processing' },
+                  { label: 'Memory Efficiency', val: '80% Lower', sub: 'Optimized Storage' },
                 ].map((stat, i) => (
                   <div key={i} className="p-6 border border-white/5 bg-[#08080a] space-y-2">
                     <div className="text-[10px] font-black uppercase text-slate-600 tracking-widest">{stat.label}</div>
@@ -329,9 +329,9 @@ export default function Home() {
               <div className="absolute -inset-10 bg-stardust-violet/5 blur-[80px]" />
               <div className="relative border border-white/5 bg-[#050505] p-1 shadow-2xl overflow-hidden" style={{ borderRadius: '2px' }}>
                 <div className="bg-[#000000] border-b border-white/10 px-6 py-4 flex justify-between items-center">
-                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 italic">POLARS_STREAM_#SUPER_COMPUTE</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 italic">DATA_STREAM_#ANALYTICS</span>
                   <div className="flex gap-2">
-                    <span className="text-[8px] font-black text-stardust-violet">PARQUET_INGEST_READY</span>
+                    <span className="text-[8px] font-black text-stardust-violet">DATA_INGEST_READY</span>
                     <div className="h-1.5 w-1.5 bg-stardust-violet rounded-full animate-pulse" />
                   </div>
                 </div>
@@ -355,11 +355,11 @@ export default function Home() {
                   </div>
                   <div className="space-y-4">
                     <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-500 border-b border-white/5 pb-2">
-                      <span>Neural_Prediction_Matrix</span>
-                      <span className="text-stardust-violet">Confidence: 0.998</span>
+                      <span>Statistical Confidence</span>
+                      <span className="text-stardust-violet">Value: 0.998</span>
                     </div>
                     <div className="text-xs text-slate-400 font-bold italic">
-                      "Predictive analysis identifies high-value network flows and protects against churn patterns using sub-ms anomaly detection."
+                      "Advanced analysis identifies high-value network patterns and provides protection against service degradation."
                     </div>
                   </div>
                 </div>
@@ -372,7 +372,7 @@ export default function Home() {
         <section id="features" className="max-w-7xl mx-auto px-6 py-40">
           <div className="grid lg:grid-cols-4 gap-12">
             <div className="lg:col-span-2 space-y-6">
-              <h2 className="text-[12px] font-black uppercase tracking-[0.5em] text-cosmic-red">Key_Feature_Set</h2>
+              <h2 className="text-[12px] font-black uppercase tracking-[0.5em] text-cosmic-red">Feature Overview</h2>
               <p className="text-5xl font-black text-white uppercase tracking-tighter italic leading-none">Reliable <br /> Management.</p>
               <p className="text-slate-500 font-medium leading-relaxed max-w-md italic">Our architecture is built on raw performance. No middleware. No latency. Just absolute precision across your entire network.</p>
             </div>
@@ -380,38 +380,38 @@ export default function Home() {
             {[
               {
                 icon: Zap,
-                title: 'Neural_SNMP',
-                desc: 'Real-time trap processing with intelligent MIB parsing for instant fault detection.',
+                title: 'Advanced SNMP',
+                desc: 'Real-time trap processing with standardized MIB parsing for instant fault detection.',
                 color: 'text-earth-green'
               },
               {
                 icon: Terminal,
-                title: 'Secure_Access',
+                title: 'Secure Access',
                 desc: 'High-concurrency secure access management capable of handling thousands of sessions reliably.',
                 color: 'text-void-indigo'
               },
               {
                 icon: Activity,
-                title: 'Deep_Flow_Analytics',
-                desc: 'Aggregated NetFlow/IPFIX analysis for precise application-layer traffic inspection.',
+                title: 'Network Analysis',
+                desc: 'Aggregated flow analysis for precise application-layer traffic inspection.',
                 color: 'text-stardust-violet'
               },
               {
                 icon: LineChart,
-                title: 'AI_Diagnostics',
-                desc: 'Custom diagnostic engine identifying performance patterns and system risks in real-time.',
+                title: 'Smart Diagnostics',
+                desc: 'Advanced diagnostic engine identifying performance patterns and system risks in real-time.',
                 color: 'text-cosmic-red'
               },
               {
                 icon: Shield,
-                title: 'Enterprise_Security',
+                title: 'Enterprise Security',
                 desc: 'Industry-standard encrypted tunneling and automated access management for complete protection.',
                 color: 'text-cosmic-red'
               },
               {
                 icon: FileText,
-                title: 'Compliance_Guard',
-                desc: 'Automated configuration auditing with drift detection against Golden Master baselines.',
+                title: 'Policy Manager',
+                desc: 'Automated configuration auditing with drift detection against baseline standards.',
                 color: 'text-orange-500'
               }
             ].map((f, i) => (
@@ -433,9 +433,9 @@ export default function Home() {
         < section id="showcase" className="bg-white/5 py-40 overflow-hidden" >
           <div className="max-w-7xl mx-auto px-6 text-center space-y-16">
             <div className="space-y-4">
-              <h2 className="text-[10px] font-black uppercase text-blue-400 tracking-[0.6em]">System_Interface</h2>
-              <p className="text-6xl font-black text-white uppercase tracking-tighter italic">Unified_Dashboard.</p>
-              <p className="text-slate-500 max-w-2xl mx-auto font-medium">A glimpse into the management center. Our UI is designed for data-dense environments where speed and clarity are paramount.</p>
+              <h2 className="text-[10px] font-black uppercase text-blue-400 tracking-[0.6em]">Management Interface</h2>
+              <p className="text-6xl font-black text-white uppercase tracking-tighter italic">Unified Dashboard.</p>
+              <p className="text-slate-500 max-w-2xl mx-auto font-medium">A portal into the management center. Our UI is designed for data-dense environments where speed and clarity are paramount.</p>
             </div>
 
             <div className="relative group cursor-zoom-in">
@@ -454,9 +454,9 @@ export default function Home() {
                   <div className="col-span-12 lg:col-span-8 space-y-6">
                     <div className="h-64 border border-white/5 bg-[#08080a] p-6 relative">
                       <div className="flex justify-between items-center mb-10">
-                        <span className="text-[10px] uppercase font-black tracking-widest text-slate-500">Global_Traffic_Dist</span>
+                        <span className="text-[10px] uppercase font-black tracking-widest text-slate-500">Global Traffic Distribution</span>
                         <div className="flex gap-2 text-[10px] font-black text-earth-green">
-                          <span className="opacity-50 tracking-tighter">LIVE_STATUS:</span>
+                          <span className="opacity-50 tracking-tighter">STATUS:</span>
                           <span>OPERATIONAL</span>
                         </div>
                       </div>
@@ -497,14 +497,14 @@ export default function Home() {
                     </div>
                     <div className="grid grid-cols-2 gap-6 h-64">
                       <div className="bg-[#08080a] border border-white/5 p-6 space-y-4">
-                        <span className="text-[10px] uppercase font-black tracking-widest text-slate-500">Threat_Matrix</span>
+                        <span className="text-[10px] uppercase font-black tracking-widest text-slate-500">Security Dashboard</span>
                         <div className="space-y-3">
                           <div className="flex justify-between text-[10px] font-bold">
                             <span className="text-white">Active_Attacks</span>
                             <span className="text-red-500">0</span>
                           </div>
                           <div className="flex justify-between text-[10px] font-bold">
-                            <span className="text-white">Filtered_Packets</span>
+                            <span className="text-white">Filtered Packets</span>
                             <span className="text-alien-green">1.2M</span>
                           </div>
                           <div className="h-1 bg-white/5 w-full mt-4">
@@ -513,7 +513,7 @@ export default function Home() {
                         </div>
                       </div>
                       <div className="bg-[#08080a] border border-white/5 p-6 relative overflow-hidden">
-                        <span className="text-[10px] uppercase font-black tracking-widest text-slate-500">System_Health</span>
+                        <span className="text-[10px] uppercase font-black tracking-widest text-slate-500">System Health</span>
                         <div className="mt-8 flex flex-col items-center justify-center">
                           <span className="text-4xl font-black text-white italic">99.9%</span>
                           <span className="text-[9px] font-mono text-emerald-500 uppercase tracking-widest mt-1">Enterprise_Stability</span>
@@ -523,7 +523,7 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="col-span-12 lg:col-span-4 bg-[#08080a] border border-white/5 p-6 space-y-6">
-                    <span className="text-[10px] uppercase font-black tracking-widest text-slate-500">Command_Log</span>
+                    <span className="text-[10px] uppercase font-black tracking-widest text-slate-500">Activity Log</span>
                     <div className="space-y-4 font-mono text-[10px] leading-tight">
                       {[
                         { time: '18:21:04', cmd: 'INIT_SYSTEM_PROBE', status: 'OK' },
@@ -547,15 +547,15 @@ export default function Home() {
           </div>
         </section >
 
-        {/* Deep Dive: Logic_Topology -> Neural_SNMP */}
+        {/* Deep Dive: Topology -> Advanced SNMP */}
         < section id="topology" className="py-40 bg-[#000000] overflow-hidden" >
           <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-20 items-center">
             <div className="order-2 lg:order-1 relative">
               <div className="absolute -inset-10 bg-alien-green/5 blur-[100px]" />
               <div className="relative border border-white/5 bg-[#050505] p-8 space-y-8" style={{ borderRadius: '2px' }}>
                 <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-500">
-                  <span>SNMP_Trap_Receiver</span>
-                  <span className="text-earth-green">MIB_Translation: ACTIVE</span>
+                  <span>Trap Receiver</span>
+                  <span className="text-earth-green">MIB Processing: ACTIVE</span>
                 </div>
                 <div className="relative h-80 w-full border border-white/5 bg-oled-black overflow-hidden p-4 font-mono text-[9px]">
                   <div className="space-y-3">
@@ -590,11 +590,11 @@ export default function Home() {
             </div>
             <div className="order-1 lg:order-2 space-y-8">
               <div className="inline-flex items-center gap-2 text-alien-green text-[10px] font-black uppercase tracking-[0.4em]">
-                <Zap className="h-4 w-4" /> Neural_SNMP
+                <Zap className="h-4 w-4" /> Advanced SNMP
               </div>
               <h2 className="text-5xl lg:text-7xl font-black text-white uppercase tracking-tighter italic leading-tight">Intelligent <br /> <span className="text-earth-green">Fault Detection.</span></h2>
               <p className="text-lg text-slate-500 font-bold leading-relaxed max-w-xl italic">
-                Forget raw, cryptic OIDs. Our Neural SNMP engine instantly translates traps into human-readable alerts using a vast MIB registry. An integrated Rule Engine automatically triages severity, so you only see what matters.
+                Get clear, actionable alerts. Our advanced SNMP engine instantly processes traps into human-readable notifications using a comprehensive MIB registry. An integrated rule engine automatically prioritizes severity, so you only see what matters.
               </p>
               <ul className="space-y-4 pt-4">
                 {[
@@ -620,8 +620,8 @@ export default function Home() {
               <div className="absolute -inset-10 bg-indigo-500/5 blur-[100px]" />
               <div className="relative border border-white/5 bg-[#050505] p-8 space-y-6" style={{ borderRadius: '2px' }}>
                 <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-500">
-                  <span>NetFlow_Aggregator_v5</span>
-                  <span className="text-stardust-violet">Flow_Ingest: ACTIVE</span>
+                  <span>Traffic Aggregator v5</span>
+                  <span className="text-stardust-violet">Flow Processing: ACTIVE</span>
                 </div>
                 <div className="space-y-2 font-mono text-[10px]">
                   {[
@@ -645,18 +645,18 @@ export default function Home() {
                 <div className="relative h-24 w-full bg-[#000000] border border-white/5 flex items-end p-2 gap-1">
                   {/* ... keep visualizer animation ... */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-[10px] font-black uppercase text-white tracking-[0.2em] bg-oled-black/80 px-4 py-1 border border-white/10">AGGREGATING_FLOWS</span>
+                    <span className="text-[10px] font-black uppercase text-white tracking-[0.2em] bg-oled-black/80 px-4 py-1 border border-white/10">AGGREGATING TRAFFIC</span>
                   </div>
                 </div>
               </div>
             </div>
             <div className="order-1 lg:order-2 space-y-8">
               <div className="inline-flex items-center gap-2 text-indigo-400 text-[10px] font-black uppercase tracking-[0.4em]">
-                <Activity className="h-4 w-4" /> Deep_Flow_Intelligence
+                <Activity className="h-4 w-4" /> Traffic Analysis
               </div>
               <h2 className="text-5xl lg:text-7xl font-black text-white uppercase tracking-tighter italic leading-tight">Application <br /> Visibility.</h2>
               <p className="text-lg text-slate-500 font-bold leading-relaxed max-w-xl">
-                Raw packets are noise. Our NetFlow aggregator buckets traffic by Application, IP, and Time Window. Identify top bandwidth consumers instantly—whether it's legitimate business traffic or a rogue data exfiltration.
+                Raw data is noise. Our status aggregator labels traffic by Application, IP, and Time Window. Identify top bandwidth consumers instantly—whether it's legitimate business traffic or unusual activity.
               </p>
               <div className="grid grid-cols-2 gap-8">
                 <div>
@@ -677,7 +677,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-20 items-center">
             <div className="space-y-8">
               <div className="inline-flex items-center gap-2 text-stardust-violet text-[10px] font-black uppercase tracking-[0.4em]">
-                <LineChart className="h-4 w-4" /> AI_Diagnostics Engine
+                <LineChart className="h-4 w-4" /> Smart Diagnostics Engine
               </div>
               <h2 className="text-5xl lg:text-7xl font-black text-white uppercase tracking-tighter italic leading-tight">Predictive <br /> <span className="text-stardust-violet">Diagnostic.</span></h2>
               <p className="text-lg text-slate-500 font-bold leading-relaxed max-w-xl">
@@ -686,14 +686,14 @@ export default function Home() {
               <div className="space-y-4">
                 <div className="p-4 border border-white/5 bg-[#000000] relative overflow-hidden group">
                   <div className="flex justify-between items-center relative z-10">
-                    <span className="text-[10px] font-black uppercase text-slate-500">Churn_Prediction_Confidence</span>
+                    <span className="text-[10px] font-black uppercase text-slate-500">Service Reliability</span>
                     <span className="text-stardust-violet font-black">98.4%</span>
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-r from-stardust-violet/10 to-transparent w-full opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div className="p-4 border border-white/5 bg-oled-black relative overflow-hidden group">
                   <div className="flex justify-between items-center relative z-10">
-                    <span className="text-[10px] font-black uppercase text-slate-500">Anomaly_Detection_Latency</span>
+                    <span className="text-[10px] font-black uppercase text-slate-500">Detection Latency</span>
                     <span className="text-white font-black">&lt;15ms</span>
                   </div>
                 </div>
@@ -703,8 +703,8 @@ export default function Home() {
               <div className="absolute -inset-10 bg-purple-500/5 blur-[100px]" />
               <div className="relative border border-white/5 bg-[#000000] p-8 space-y-8" style={{ borderRadius: '2px' }}>
                 <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-500">
-                  <span>Neural_Processor_L7</span>
-                  <span className="text-stardust-violet">Learning_Matrix: STABLE</span>
+                  <span>Advanced Processor</span>
+                  <span className="text-stardust-violet">Processing Status: STABLE</span>
                 </div>
                 <div className="grid grid-cols-4 gap-2">
                   {[...Array(16)].map((_, i) => (
@@ -722,8 +722,8 @@ export default function Home() {
                     <span className="text-white">PROCESSING...</span>
                   </div>
                   <div className="bg-oled-black p-3 border border-white/5">
-                    <p className="text-[9px] font-mono text-stardust-violet">DEVIATION_DETECTED: SEGMENT_04_BANDWIDTH</p>
-                    <p className="text-[9px] font-mono text-slate-500 mt-1">Confidence: 0.992 | Root_Cause: Link_Congestion</p>
+                    <p className="text-[9px] font-mono text-stardust-violet">ISSUE_DETECTED: SEGMENT_04_BANDWIDTH</p>
+                    <p className="text-[9px] font-mono text-slate-500 mt-1">Confidence: 0.992 | Root Cause: Network Congestion</p>
                   </div>
                 </div>
               </div>
@@ -738,8 +738,8 @@ export default function Home() {
               <div className="absolute -inset-10 bg-cosmic-red/5 blur-[100px]" />
               <div className="relative border border-white/5 bg-oled-black p-10 space-y-8" style={{ borderRadius: '2px' }}>
                 <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-500">
-                  <span>Security_Vault_v2</span>
-                  <span className="text-cosmic-red">AES-256-GCM: ACTIVE</span>
+                  <span>Secure Vault</span>
+                  <span className="text-cosmic-red">ENCRYPTION: ACTIVE</span>
                 </div>
                 <div className="space-y-6">
                   {[
@@ -761,15 +761,15 @@ export default function Home() {
             </div>
             <div className="order-1 lg:order-2 space-y-8">
               <div className="inline-flex items-center gap-2 text-cosmic-red text-[10px] font-black uppercase tracking-[0.4em]">
-                <Shield className="h-4 w-4" /> Advanced_Security Vault
+                <Shield className="h-4 w-4" /> Secure Vault
               </div>
               <h2 className="text-5xl lg:text-7xl font-black text-white uppercase tracking-tighter italic leading-tight">Total <br /> <span className="text-cosmic-red">Protection.</span></h2>
               <p className="text-lg text-slate-500 font-bold leading-relaxed max-w-xl">
                 Deploy infrastructure with total confidence. Our security stack integrates industry-standard encryption with automated access management, ensuring your network is protected for critical data and operations.
               </p>
               <div className="flex gap-4">
-                <span className="px-4 py-2 bg-cosmic-red/10 border border-cosmic-red/20 text-cosmic-red text-[9px] font-black uppercase tracking-widest">Zero_Trust</span>
-                <span className="px-4 py-2 bg-cosmic-red/10 border border-cosmic-red/20 text-cosmic-red text-[9px] font-black uppercase tracking-widest">End_to_End_Enc</span>
+                <span className="px-4 py-2 bg-cosmic-red/10 border border-cosmic-red/20 text-cosmic-red text-[9px] font-black uppercase tracking-widest">Secure Network</span>
+                <span className="px-4 py-2 bg-cosmic-red/10 border border-cosmic-red/20 text-cosmic-red text-[9px] font-black uppercase tracking-widest">End-to-End Encryption</span>
               </div>
             </div>
           </div>
@@ -780,20 +780,20 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-20 items-center">
             <div className="space-y-8">
               <div className="inline-flex items-center gap-2 text-orange-400 text-[10px] font-black uppercase tracking-[0.4em]">
-                <FileText className="h-4 w-4" /> Compliance_Guard
+                <FileText className="h-4 w-4" /> Policy Manager
               </div>
-              <h2 className="text-5xl lg:text-7xl font-black text-white uppercase tracking-tighter italic leading-tight">Zero-Drift <br /> <span className="text-orange-400">Policy.</span></h2>
+              <h2 className="text-5xl lg:text-7xl font-black text-white uppercase tracking-tighter italic leading-tight">Configuration <br /> <span className="text-orange-400">Hygiene.</span></h2>
               <p className="text-lg text-slate-500 font-bold leading-relaxed max-w-xl">
                 Configuration drift is the #1 cause of outages. Our system automatically audits every device against your Golden Master configurations. Detect unauthorized changes, visualize diffs, and rollback instantly.
               </p>
               <div className="grid grid-cols-2 gap-4 pt-4">
                 <div className="p-4 border border-white/5 bg-oled-black">
                   <p className="text-2xl font-black text-white">100%</p>
-                  <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Audit_Coverage</p>
+                  <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Audit Coverage</p>
                 </div>
                 <div className="p-4 border border-white/5 bg-oled-black">
-                  <p className="text-2xl font-black text-orange-400">AUTO</p>
-                  <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Drift_Detection</p>
+                  <p className="text-2xl font-black text-orange-400">ACTIVE</p>
+                  <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Drift Detection</p>
                 </div>
               </div>
             </div>

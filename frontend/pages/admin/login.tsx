@@ -41,7 +41,7 @@ export default function AdminLogin() {
     return (
         <div className="min-h-screen bg-oled-black text-slate-400 flex items-center justify-center p-6 font-sans overflow-hidden">
             <Head>
-                <title>Admin Protocol | Alien Net</title>
+                <title>Admin Login | Network Solutions</title>
             </Head>
 
             {/* Background elements */}

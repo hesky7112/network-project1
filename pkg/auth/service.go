@@ -196,11 +196,22 @@ func (s *Service) GetCurrentUser(c *gin.Context) {
 	})
 }
 
+func (s *Service) ListPublicRoles(c *gin.Context) {
+	var roles []Role
+	// Fetch all roles, ordered by level
+	if err := s.db.Order("level ASC").Find(&roles).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve role matrix"})
+		return
+	}
+	c.JSON(http.StatusOK, roles)
+}
+
 func (s *Service) Register(c *gin.Context) {
 	var req struct {
 		Username string `json:"username" binding:"required"`
 		Email    string `json:"email" binding:"required,email"`
 		Password string `json:"password" binding:"required,min=8"`
+		Role     string `json:"role"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -221,17 +232,64 @@ func (s *Service) Register(c *gin.Context) {
 		return
 	}
 
+	// Default role if not provided
+	role := req.Role
+	if role == "" {
+		role = "viewer"
+	}
+
 	// Create user
 	user := models.User{
 		Username: req.Username,
 		Email:    req.Email,
 		Password: hashedPassword,
-		Role:     "user", // Default role
+		Role:     role, // Still keeping this for convenience/token
 	}
 
 	if err := s.db.Create(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
+	}
+
+	// Link to RBAC system
+	var dbRole Role
+	// Look up role by name (exact match from frontend selection)
+	roleToFind := req.Role
+	if roleToFind == "" {
+		roleToFind = "Viewer" // Default system role name
+	}
+
+	// Try to find the role by Name (which is what we set in the frontend)
+	// We check both the provided name and mapped system names for backwards compatibility
+	if err := s.db.Where("name = ?", roleToFind).First(&dbRole).Error; err != nil {
+		// Fallback for legacy hardcoded values if the name doesn't match a real Role record
+		roleName := "Viewer"
+		switch strings.ToLower(roleToFind) {
+		case "admin", "sentinel":
+			roleName = "Super Admin"
+		case "engineer", "architect":
+			roleName = "Network Admin"
+		case "auditor", "guardian":
+			roleName = "Technician"
+		case "viewer", "observer":
+			roleName = "Viewer"
+		}
+		s.db.Where("name = ?", roleName).First(&dbRole)
+	}
+
+	if dbRole.ID != 0 {
+		// Assign role (AssignedBy 0 for system/self-registration)
+		userRole := UserRole{
+			UserID:     user.ID,
+			RoleID:     dbRole.ID,
+			AssignedBy: 0,
+			AssignedAt: time.Now(),
+		}
+		s.db.Create(&userRole)
+
+		// Ensure user.Role reflects the DB Role Name for JWT consistency
+		user.Role = dbRole.Name
+		s.db.Save(&user)
 	}
 
 	c.JSON(http.StatusCreated, gin.H{

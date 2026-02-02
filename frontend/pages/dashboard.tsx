@@ -115,15 +115,15 @@ export default function Dashboard() {
   const [onboardingProgress, setOnboardingProgress] = useState(20);
   const [onboardingTasks, setOnboardingTasks] = useState([
     { id: '1', label: 'Initialize System', completed: true },
-    { id: '2', label: 'Configure Topology', completed: false, action: () => setShowWizard(true) },
-    { id: '3', label: 'Connect First Node', completed: false },
+    { id: '2', label: 'Configure Network', completed: false, action: () => setShowWizard(true) },
+    { id: '3', label: 'Connect First Device', completed: false },
     { id: '4', label: 'Set Alert Thresholds', completed: false },
   ]);
 
   useEffect(() => {
     // Simulate checking first time visitor
     const timer = setTimeout(() => {
-      const hasVisited = localStorage.getItem('alien_network_visited');
+      const hasVisited = localStorage.getItem('network_manager_visited');
       if (!hasVisited) {
         setShowWelcome(true);
       }
@@ -134,7 +134,7 @@ export default function Dashboard() {
   const handleWelcomeStart = () => {
     setShowWelcome(false);
     setShowWizard(true);
-    localStorage.setItem('alien_network_visited', 'true');
+    localStorage.setItem('network_manager_visited', 'true');
   };
 
   const handleWizardComplete = () => {
@@ -551,7 +551,7 @@ export default function Dashboard() {
               {trendIcon}
             </div>
             <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">
-              Deviance: {trend === 'up' ? '+12.4%' : trend === 'down' ? '-8.2%' : '±0.0'}
+              Variation: {trend === 'up' ? '+12.4%' : trend === 'down' ? '-8.2%' : '±0.0'}
             </span>
           </div>
         )}
@@ -628,7 +628,7 @@ export default function Dashboard() {
               ))}
             </div>
             <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest mt-1">
-              {device.ip_address} • {device.device_type || 'Unknown Node'}
+              {device.ip_address} • {device.device_type || 'Unknown Device'}
             </p>
           </div>
         </div>
@@ -724,7 +724,7 @@ export default function Dashboard() {
                 </span>
                 <span className="flex items-center">
                   <Globe className="h-3 w-3 mr-2" />
-                  {alert.device?.hostname || 'Kernel_Host'}
+                  {alert.device?.hostname || 'System Host'}
                 </span>
               </div>
             </div>

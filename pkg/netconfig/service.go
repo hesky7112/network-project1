@@ -8,8 +8,10 @@ import (
 	"time"
 
 	"networking-main/internal/models"
+	"networking-main/pkg/logger"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -143,7 +145,7 @@ func (s *Service) ApplyTemplate(c *gin.Context) error {
 	}
 
 	// Apply template logic would go here
-	fmt.Printf("Applying template: %s\n", template.Name)
+	logger.Info("Applying template", zap.String("name", template.Name))
 	return nil
 }
 
@@ -218,12 +220,19 @@ func (s *Service) CheckDeviceCompliance(device models.Device, rules []Compliance
 }
 
 func (s *Service) ApplyConfigTemplate(device models.Device, template ConfigTemplate) error {
-	// TODO: Implement actual template application logic using device connection
-	return nil
+	conn := DeviceConnection{
+		IPAddress:  device.IPAddress,
+		Username:   device.Username,
+		Password:   device.Password,
+		Port:       22,
+		DeviceType: device.DeviceType,
+	}
+	return s.manager.ApplyTemplate(conn, template)
 }
 
-// Advanced configuration methods
-// TODO: Implement ConfigureSTP method
+func (s *Service) ConfigureSTP(device models.Device, config STPConfig) error {
+	return s.stpManager.ConfigureSTP(device, config)
+}
 
 func (s *Service) ConfigureEtherChannel(c *gin.Context, deviceID int, config EtherChannelConfig) error {
 	var device models.Device
@@ -298,7 +307,9 @@ func (s *Service) DetectAllDrift(ctx context.Context) error {
 	for _, dev := range devices {
 		if _, err := s.DetectConfigDrift(ctx, dev.ID); err != nil {
 			// Log error but continue
-			fmt.Printf("Drift detection failed for %s: %v\n", dev.Hostname, err)
+			logger.Error("Drift detection failed",
+				zap.String("hostname", dev.Hostname),
+				zap.Error(err))
 		}
 	}
 	return nil
@@ -310,7 +321,9 @@ func (s *Service) ExecuteScheduledChanges(ctx context.Context) error {
 		// 1. Get device connection
 		// 2. Push commands
 		// This needs to use ConfigManager possibly
-		fmt.Printf("Executing change request %d on devices %v\n", req.ID, req.DeviceIDs)
+		logger.Info("Executing change request",
+			zap.Uint("request_id", req.ID),
+			zap.Uints("device_ids", req.DeviceIDs))
 		return nil
 	})
 }

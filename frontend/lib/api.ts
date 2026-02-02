@@ -109,8 +109,13 @@ class ApiClient {
     return response.data;
   }
 
-  async register(userData: { username: string; email: string; password: string }): Promise<AuthResponse> {
+  async register(userData: import('@/types').RegisterRequest): Promise<AuthResponse> {
     const response = await this.api.post<AuthResponse>('/auth/register', userData)
+    return response.data
+  }
+
+  async getPublicRoles() {
+    const response = await this.api.get('/auth/roles')
     return response.data
   }
 
@@ -435,6 +440,8 @@ class ApiClient {
     if (params?.limit) query.append('limit', params.limit.toString())
     return this.get(`/audit/logs?${query}`)
   }
+
+  // Workflows (Flow Forge)
 
   // Workflows (Flow Forge)
   async getWorkflows() {

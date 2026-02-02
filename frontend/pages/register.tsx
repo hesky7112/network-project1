@@ -2,27 +2,44 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { PasswordStrength } from '@/components/ui/password-strength';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { Activity, UserPlus } from '@/components/icons';
+import { Activity, UserPlus, ArrowRight, ArrowLeft } from 'lucide-react';
 import { Logo } from '@/components/logo';
 import { apiClient } from '@/lib/api';
+import { RoleSelector } from '@/components/auth/role-selector';
 
 export default function Register() {
   const router = useRouter();
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
+    role: '',
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  const handleNext = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.username || !formData.email || !formData.password) {
+      setError('Please fill in all identity fields.');
+      return;
+    }
+    setError('');
+    setStep(2);
+  };
+
+  const handleBack = () => {
+    setStep(1);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +51,7 @@ export default function Register() {
       setSuccess(true);
       setTimeout(() => router.push('/login'), 3000);
     } catch (err: any) {
-      setError(err?.message || 'Registration failed. Check your parameters.');
+      setError(err?.response?.data?.error || err?.message || 'Registration failed. Check your parameters.');
     } finally {
       setIsLoading(false);
     }
@@ -69,7 +86,7 @@ export default function Register() {
   return (
     <div className="min-h-screen bg-[#000000] text-slate-400 flex items-center justify-center p-6 font-sans py-20">
       <Head>
-        <title>Registration Center | Alien Net</title>
+        <title>Registration Center | Network Solutions</title>
       </Head>
 
       <div className="fixed inset-0 pointer-events-none opacity-10">
@@ -84,73 +101,126 @@ export default function Register() {
         <div className="text-center mb-12 space-y-4">
           <Logo variant="auth" className="mb-6" />
           <h1 className="text-3xl font-black text-white uppercase tracking-tighter">Registration Center</h1>
-          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-alien-green">Register System Administrator</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-alien-green">
+            Step {step} of 2: {step === 1 ? 'Credentials' : 'Authorization'}
+          </p>
         </div>
 
         <div className="bg-[#050505] border border-white/5 p-8 relative overflow-hidden" style={{ borderRadius: '2px' }}>
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-alien-green/30 to-transparent" />
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="username" className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Callsign (Username)</Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="operator_zero"
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                className="bg-[#000000] border-white/5 text-white h-12 text-sm focus:border-alien-green/50 focus:ring-1 focus:ring-alien-green/20 placeholder:text-slate-700"
-                style={{ borderRadius: '2px' }}
-                required
-              />
-            </div>
+          <AnimatePresence mode="wait">
+            {step === 1 ? (
+              <motion.form
+                key="step1"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                onSubmit={handleNext}
+                className="space-y-6"
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="username" className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Callsign (Username)</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="operator_zero"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    className="bg-[#000000] border-white/5 text-white h-12 text-sm focus:border-alien-green/50 focus:ring-1 focus:ring-alien-green/20 placeholder:text-slate-700"
+                    style={{ borderRadius: '2px' }}
+                    required
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Primary ID (Email)</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="operator@alien.net"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="bg-[#000000] border-white/5 text-white h-12 text-sm focus:border-alien-green/50 focus:ring-1 focus:ring-alien-green/20 placeholder:text-slate-700"
-                style={{ borderRadius: '2px' }}
-                required
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Primary ID (Email)</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="admin@network-solutions.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="bg-[#000000] border-white/5 text-white h-12 text-sm focus:border-alien-green/50 focus:ring-1 focus:ring-alien-green/20 placeholder:text-slate-700"
+                    style={{ borderRadius: '2px' }}
+                    required
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Access Key</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="bg-[#000000] border-white/5 text-white h-12 text-sm focus:border-alien-green/50 focus:ring-1 focus:ring-alien-green/20 placeholder:text-slate-700"
-                style={{ borderRadius: '2px' }}
-                required
-              />
-              <div className="pt-2">
-                <PasswordStrength password={formData.password} />
-              </div>
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Access Key</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="bg-[#000000] border-white/5 text-white h-12 text-sm focus:border-alien-green/50 focus:ring-1 focus:ring-alien-green/20 placeholder:text-slate-700"
+                    style={{ borderRadius: '2px' }}
+                    required
+                  />
+                  <div className="pt-2">
+                    <PasswordStrength password={formData.password} />
+                  </div>
+                </div>
 
-            {error && (
-              <Alert variant="destructive" className="bg-red-500/10 border-red-500/20 text-red-400 py-3" style={{ borderRadius: '2px' }}>
-                <AlertDescription className="text-[10px] font-bold uppercase tracking-wide">{error}</AlertDescription>
-              </Alert>
+                {error && (
+                  <Alert variant="destructive" className="bg-red-500/10 border-red-500/20 text-red-400 py-3" style={{ borderRadius: '2px' }}>
+                    <AlertDescription className="text-[10px] font-bold uppercase tracking-wide">{error}</AlertDescription>
+                  </Alert>
+                )}
+
+                <Button
+                  type="submit"
+                  className="w-full bg-alien-green text-black hover:bg-[#00dd38] h-12 font-black uppercase text-xs tracking-widest transition-all gap-2"
+                  style={{ borderRadius: '2px' }}
+                >
+                  Configure Authorization <ArrowRight className="w-4 h-4" />
+                </Button>
+              </motion.form>
+            ) : (
+              <motion.form
+                key="step2"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                onSubmit={handleSubmit}
+                className="space-y-8"
+              >
+                <RoleSelector
+                  selectedRole={formData.role}
+                  onChange={(role) => setFormData({ ...formData, role })}
+                />
+
+                {error && (
+                  <Alert variant="destructive" className="bg-red-500/10 border-red-500/20 text-red-400 py-3" style={{ borderRadius: '2px' }}>
+                    <AlertDescription className="text-[10px] font-bold uppercase tracking-wide">{error}</AlertDescription>
+                  </Alert>
+                )}
+
+                <div className="flex gap-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleBack}
+                    className="flex-1 border-white/10 text-white hover:bg-white/5 h-12 font-black uppercase text-xs tracking-widest"
+                    style={{ borderRadius: '2px' }}
+                    disabled={isLoading}
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="flex-[2] bg-alien-green text-black hover:bg-[#00dd38] h-12 font-black uppercase text-xs tracking-widest transition-all"
+                    style={{ borderRadius: '2px' }}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? <LoadingSpinner size="sm" /> : 'Finalize Registration'}
+                  </Button>
+                </div>
+              </motion.form>
             )}
-
-            <Button
-              type="submit"
-              className="w-full bg-alien-green text-black hover:bg-[#00dd38] h-12 font-black uppercase text-xs tracking-widest transition-all"
-              style={{ borderRadius: '2px' }}
-              disabled={isLoading}
-            >
-              {isLoading ? <LoadingSpinner size="sm" /> : 'Register Identification'}
-            </Button>
-          </form>
+          </AnimatePresence>
 
           <div className="mt-8 pt-6 border-t border-white/5 text-center">
             <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">

@@ -57,6 +57,13 @@ type ForumPost struct {
 	UpdatedAt  time.Time `json:"updated_at"`
 }
 
+// ForumThreadUpvote tracks user upvotes to prevent duplicates
+type ForumThreadUpvote struct {
+	ThreadID  uint      `gorm:"primaryKey;index"`
+	UserID    uint      `gorm:"primaryKey;index"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 // ========== Gamification ==========
 
 // UserReputation tracks user stats and levels

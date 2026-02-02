@@ -15,13 +15,6 @@ import { useEffect } from 'react';
 
 export default function SystemSettings() {
   const [formData, setFormData] = useState<any>({});
-  // const [loading, setLoading] = useState(true); 
-  // actually, let's just use it or remove it.
-  // It is used in fetchSettings?
-  // "Type error: 'loading' is declared but its value is never read." 
-  // fetchSettings sets it, but the render doesn't use it.
-  // I will check if the JSX uses loading. if not, I'll add a loader or just remove the state.
-  // Let me view settings.tsx first to do it right.
 
   const fetchSettings = async () => {
     // setLoading(true);

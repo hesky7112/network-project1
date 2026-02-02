@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 	"time"
 
@@ -42,7 +43,7 @@ func (re *RemediationEngine) SetNeuralService(ns *neural.Service) {
 type Playbook struct {
 	Name        string
 	Description string
-	Action      func(ctx context.Context, device models.Device) error
+	Action      func(ctx context.Context, device models.Device, alert models.NetworkAlert) error
 }
 
 // RemediationResult tracks the outcome of a fix
@@ -76,7 +77,7 @@ func (re *RemediationEngine) EvaluateAlert(ctx context.Context, alert models.Net
 			playbook = &Playbook{
 				Name:        fmt.Sprintf("Neural Fix: %s", advice.ID),
 				Description: fmt.Sprintf("AI Suggested fix based on incident %s", advice.ID),
-				Action: func(ctx context.Context, device models.Device) error {
+				Action: func(ctx context.Context, device models.Device, alert models.NetworkAlert) error {
 					log.Printf("🧠 Executing Neural Fix [%s]: %s", advice.ID, suggestedFix)
 					_, err := re.configService.RunCommand(device, suggestedFix)
 					return err
@@ -111,7 +112,7 @@ func (re *RemediationEngine) EvaluateAlert(ctx context.Context, alert models.Net
 	log.Printf("🤖 Auto-Remediation: Executing %s for device %s", playbook.Name, device.Hostname)
 
 	// 3. Execute Playbook
-	err := playbook.Action(ctx, device)
+	err := playbook.Action(ctx, device, alert)
 	success := err == nil
 	output := "Executed successfully"
 	if err != nil {
@@ -146,8 +147,8 @@ func (re *RemediationEngine) getHighCPUPlaybook() *Playbook {
 	return &Playbook{
 		Name:        "Clear Process Cache",
 		Description: "Clears non-essential process caches to free CPU",
-		Action: func(ctx context.Context, device models.Device) error {
-			// In real life, detailed command. Mocking implementation.
+		Action: func(ctx context.Context, device models.Device, alert models.NetworkAlert) error {
+			// In real life, detailed command.
 			cmd := "clear ip cache flow"
 			_, err := re.configService.RunCommand(device, cmd)
 			return err
@@ -159,9 +160,28 @@ func (re *RemediationEngine) getInterfaceResetPlaybook() *Playbook {
 	return &Playbook{
 		Name:        "Bounce Interface",
 		Description: "Shuts and no-shuts the impacted interface",
-		Action: func(ctx context.Context, device models.Device) error {
-			// Requires parsing interface from alert, simplifying here
-			return fmt.Errorf("interface parsing not implemented")
+		Action: func(ctx context.Context, device models.Device, alert models.NetworkAlert) error {
+			// Regex to find interface name
+			reIf := regexp.MustCompile(`(?i)(?:interface|port)\s+([a-zA-Z0-9\/\-\.]+)`)
+			match := reIf.FindStringSubmatch(alert.Message)
+			if len(match) < 2 {
+				return fmt.Errorf("failed to identify interface in alert: %s", alert.Message)
+			}
+			iface := match[1]
+
+			// Bounce interface commands
+			cmds := []string{
+				fmt.Sprintf("interface %s", iface),
+				"shutdown",
+				"no shutdown",
+			}
+			for _, cmd := range cmds {
+				_, err := re.configService.RunCommand(device, cmd)
+				if err != nil {
+					return err
+				}
+			}
+			return nil
 		},
 	}
 }
@@ -170,7 +190,7 @@ func (re *RemediationEngine) getRestartBGPPlaybook() *Playbook {
 	return &Playbook{
 		Name:        "Soft Reset BGP",
 		Description: "Performs soft reset of BGP peers",
-		Action: func(ctx context.Context, device models.Device) error {
+		Action: func(ctx context.Context, device models.Device, alert models.NetworkAlert) error {
 			cmd := "clear ip bgp * soft"
 			_, err := re.configService.RunCommand(device, cmd)
 			return err
@@ -187,6 +207,6 @@ func (re *RemediationEngine) getPlaybookByID(id string) *Playbook {
 		return re.getInterfaceResetPlaybook()
 	default:
 		// Fallback for new playbooks that don't have code actions yet
-		return &Playbook{Name: id, Description: "Generic evolutionary placeholder", Action: func(ctx context.Context, device models.Device) error { return nil }}
+		return &Playbook{Name: id, Description: "Generic evolutionary placeholder", Action: func(ctx context.Context, device models.Device, alert models.NetworkAlert) error { return nil }}
 	}
 }

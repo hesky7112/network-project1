@@ -298,7 +298,7 @@ export default function Telemetry() {
                               <h4 className="text-[11px] font-black text-white uppercase tracking-[0.3em] italic">CRITICAL_NODES_&_TALKERS</h4>
                               <div className="text-[9px] text-slate-600 uppercase tracking-[0.2em] italic font-black">Filtered by: BYTE_VOLUME</div>
                             </div>
-                            <div className="alien-net-table overflow-x-auto">
+                            <div className="network-table overflow-x-auto">
                               <table className="min-w-full divide-y divide-white/5 border border-white/5">
                                 <thead className="bg-white/[0.02]">
                                   <tr>

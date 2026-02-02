@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 	models "networking-main/internal/models"
 	"strconv"
@@ -47,16 +49,42 @@ func (h *APIHandlers) CreateDevice(c *gin.Context) {
 // UpdateDevice updates a device
 func (h *APIHandlers) UpdateDevice(c *gin.Context) {
 	id := c.Param("id")
-	var device models.Device
-	if err := c.ShouldBindJSON(&device); err != nil {
+	var inputDevice models.Device
+	if err := c.ShouldBindJSON(&inputDevice); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := h.inventoryService.UpdateDevice(c, id, device); err != nil {
+	// Capture Old State
+	var oldDevice models.Device
+	h.DB.First(&oldDevice, id)
+	oldState, _ := json.Marshal(oldDevice)
+
+	if err := h.inventoryService.UpdateDevice(c, id, inputDevice); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	// Capture New State
+	var newDevice models.Device
+	h.DB.First(&newDevice, id)
+	newState, _ := json.Marshal(newDevice)
+
+	// High Fidelity Audit
+	h.rbac.LogAccessWithState(
+		c.GetUint("user_id"),
+		c.GetString("username"),
+		"update",
+		"devices",
+		newDevice.ID,
+		c.ClientIP(),
+		c.Request.UserAgent(),
+		true,
+		fmt.Sprintf("Device %s re-calibrated", newDevice.Hostname),
+		string(oldState),
+		string(newState),
+	)
+
 	c.JSON(http.StatusOK, gin.H{"message": "Device updated successfully"})
 }
 

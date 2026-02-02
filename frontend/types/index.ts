@@ -2,7 +2,7 @@ export interface User {
   id: number
   username: string
   email: string
-  role: 'admin' | 'engineer' | 'viewer' | 'seller'
+  role: 'admin' | 'engineer' | 'viewer' | 'seller' | 'auditor'
   is_verified?: boolean
   created_at: string
   updated_at: string
@@ -80,6 +80,13 @@ export interface NetworkAlert {
 export interface AuthResponse {
   token: string
   user: User
+}
+
+export interface RegisterRequest {
+  username: string
+  email: string
+  password: string
+  role: string
 }
 
 export interface LoginRequest {

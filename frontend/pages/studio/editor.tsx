@@ -12,7 +12,7 @@ export default function MarimoEditor() {
     return (
         <div className="h-screen w-full bg-black flex flex-col overflow-hidden">
             <Head>
-                <title>Module Studio Editor | Alien Net</title>
+                <title>App Editor | Network Solutions</title>
             </Head>
 
             {/* Editor Header */}

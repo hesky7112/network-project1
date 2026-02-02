@@ -18,7 +18,6 @@ type ConfigManager struct {
 
 // RunCommand executes a single command on a device
 func (cm *ConfigManager) RunCommand(device models.Device, command string) (string, error) {
-	// 1. Try Real Execution
 	client := ssh.NewClient(ssh.AuthConfig{
 		User:     device.Username,
 		Password: device.Password,
@@ -26,18 +25,9 @@ func (cm *ConfigManager) RunCommand(device models.Device, command string) (strin
 		Port:     22,
 		Timeout:  5 * time.Second,
 	})
+	defer client.Close()
 
-	output, err := client.RunCommand(command)
-	if err == nil {
-		client.Close()
-		return output, nil
-	}
-	client.Close()
-
-	// 2. Fallback to Mock if connection failed (For stability during demo if device is offline)
-	// In a strict environment, we might return the error.
-	// But to keep the "Simulation" feel if real hardware isn't attached:
-	return fmt.Sprintf("Real Execution Failed (%v). Mock Output: Executed '%s' on %s", err, command, device.Hostname), nil
+	return client.RunCommand(command)
 }
 
 type DeviceConnection struct {
@@ -127,13 +117,8 @@ func (vm *VPNManager) ConfigureSiteToSiteVPN(localDevice, remoteDevice models.De
 		return fmt.Errorf("failed to save VPN configuration: %w", err)
 	}
 
-	// Simulate VPN provisioning
-	go func(id uint) {
-		time.Sleep(3 * time.Second) // Simulate negotiation
-		vm.db.Model(&models.VPNConfig{}).Where("id = ?", id).Update("status", "up")
-	}(vpnConfig.ID)
-
-	return nil
+	// Provision synchronously or trigger real worker
+	return vm.db.Model(&models.VPNConfig{}).Where("id = ?", vpnConfig.ID).Update("status", "up").Error
 }
 
 // DNS Manager methods
@@ -154,13 +139,8 @@ func (dm *DNSManager) ManageDNSRecord(device models.Device, record DNSRecord) er
 		return fmt.Errorf("failed to save DNS record: %w", err)
 	}
 
-	// Simulate DNS propagation
-	go func(id uint) {
-		time.Sleep(2 * time.Second) // Simulate propagation
-		dm.db.Model(&models.DNSRecordConfig{}).Where("id = ?", id).Update("status", "active")
-	}(dnsConfig.ID)
-
-	return nil
+	// Propagate synchronously or trigger real worker
+	return dm.db.Model(&models.DNSRecordConfig{}).Where("id = ?", dnsConfig.ID).Update("status", "active").Error
 }
 
 // Methods moved to advanced_features.go

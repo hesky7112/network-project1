@@ -147,7 +147,7 @@ export default function Reports() {
                 )}
               >
                 <Plus className="mr-2 h-4 w-4" />
-                {showBuilder ? "EXIT_BUILDER" : "CUSTOM_STREAM_ARCHITECT"}
+                {showBuilder ? "EXIT_BUILDER" : "CUSTOM_STREAM_BUILDER"}
               </Button>
             </div>
           </div>

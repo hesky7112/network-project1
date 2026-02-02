@@ -9,58 +9,62 @@ import (
 
 // DisasterManager handles disaster recovery and business continuity
 type DisasterManager struct {
-	db *gorm.DB
+	db             *gorm.DB
+	recoveryEngine *RecoveryEngine
 }
 
 // DisasterRecoveryPlan represents a DR plan
 type DisasterRecoveryPlan struct {
-	ID              uint      `json:"id" gorm:"primaryKey"`
-	Name            string    `json:"name"`
-	Type            string    `json:"type"` // network_outage, device_failure, security_breach, data_loss
-	Priority        string    `json:"priority"` // critical, high, medium, low
-	RTO             int       `json:"rto"` // Recovery Time Objective in minutes
-	RPO             int       `json:"rpo"` // Recovery Point Objective in minutes
-	Steps           string    `json:"steps" gorm:"type:jsonb"`
-	Contacts        string    `json:"contacts" gorm:"type:jsonb"`
-	Resources       string    `json:"resources" gorm:"type:jsonb"`
-	LastTested      *time.Time `json:"last_tested"`
-	LastActivated   *time.Time `json:"last_activated"`
-	SuccessRate     float64   `json:"success_rate"`
+	ID            uint       `json:"id" gorm:"primaryKey"`
+	Name          string     `json:"name"`
+	Type          string     `json:"type"`     // network_outage, device_failure, security_breach, data_loss
+	Priority      string     `json:"priority"` // critical, high, medium, low
+	RTO           int        `json:"rto"`      // Recovery Time Objective in minutes
+	RPO           int        `json:"rpo"`      // Recovery Point Objective in minutes
+	Steps         string     `json:"steps" gorm:"type:jsonb"`
+	Contacts      string     `json:"contacts" gorm:"type:jsonb"`
+	Resources     string     `json:"resources" gorm:"type:jsonb"`
+	LastTested    *time.Time `json:"last_tested"`
+	LastActivated *time.Time `json:"last_activated"`
+	SuccessRate   float64    `json:"success_rate"`
 }
 
 // DisasterEvent represents a disaster event
 type DisasterEvent struct {
-	ID              uint      `json:"id" gorm:"primaryKey"`
-	Type            string    `json:"type"`
-	Severity        string    `json:"severity"` // catastrophic, major, moderate, minor
-	Description     string    `json:"description"`
-	AffectedSystems string    `json:"affected_systems" gorm:"type:jsonb"`
-	ImpactedUsers   int       `json:"impacted_users"`
-	DetectedAt      time.Time `json:"detected_at"`
+	ID              uint       `json:"id" gorm:"primaryKey"`
+	Type            string     `json:"type"`
+	Severity        string     `json:"severity"` // catastrophic, major, moderate, minor
+	Description     string     `json:"description"`
+	AffectedSystems string     `json:"affected_systems" gorm:"type:jsonb"`
+	ImpactedUsers   int        `json:"impacted_users"`
+	DetectedAt      time.Time  `json:"detected_at"`
 	DeclaredAt      *time.Time `json:"declared_at"`
 	ResolvedAt      *time.Time `json:"resolved_at"`
-	PlanID          *uint     `json:"plan_id"`
-	Status          string    `json:"status"` // detected, declared, recovering, resolved
-	RecoveryTime    int       `json:"recovery_time"` // actual recovery time in minutes
+	PlanID          *uint      `json:"plan_id"`
+	Status          string     `json:"status"`        // detected, declared, recovering, resolved
+	RecoveryTime    int        `json:"recovery_time"` // actual recovery time in minutes
 }
 
 // BackupSnapshot represents a system backup
 type BackupSnapshot struct {
-	ID          uint      `json:"id" gorm:"primaryKey"`
-	Type        string    `json:"type"` // full, incremental, differential
-	Scope       string    `json:"scope"` // system, network, database, config
-	Size        int64     `json:"size"` // in bytes
-	Location    string    `json:"location"`
-	CreatedAt   time.Time `json:"created_at"`
-	ExpiresAt   time.Time `json:"expires_at"`
-	Verified    bool      `json:"verified"`
-	Encrypted   bool      `json:"encrypted"`
-	Compressed  bool      `json:"compressed"`
+	ID         uint      `json:"id" gorm:"primaryKey"`
+	Type       string    `json:"type"`  // full, incremental, differential
+	Scope      string    `json:"scope"` // system, network, database, config
+	Size       int64     `json:"size"`  // in bytes
+	Location   string    `json:"location"`
+	CreatedAt  time.Time `json:"created_at"`
+	ExpiresAt  time.Time `json:"expires_at"`
+	Verified   bool      `json:"verified"`
+	Encrypted  bool      `json:"encrypted"`
+	Compressed bool      `json:"compressed"`
 }
 
 // NewDisasterManager creates a new disaster manager
-func NewDisasterManager(db *gorm.DB) *DisasterManager {
-	dm := &DisasterManager{db: db}
+func NewDisasterManager(db *gorm.DB, re *RecoveryEngine) *DisasterManager {
+	dm := &DisasterManager{
+		db:             db,
+		recoveryEngine: re,
+	}
 	db.AutoMigrate(&DisasterRecoveryPlan{}, &DisasterEvent{}, &BackupSnapshot{})
 	return dm
 }
@@ -68,12 +72,12 @@ func NewDisasterManager(db *gorm.DB) *DisasterManager {
 // DeclareDisaster declares a disaster event
 func (dm *DisasterManager) DeclareDisaster(eventType, severity, description string, affectedSystems []string) (*DisasterEvent, error) {
 	event := &DisasterEvent{
-		Type:            eventType,
-		Severity:        severity,
-		Description:     description,
-		DetectedAt:      time.Now(),
-		Status:          "declared",
-		ImpactedUsers:   dm.estimateImpactedUsers(affectedSystems),
+		Type:          eventType,
+		Severity:      severity,
+		Description:   description,
+		DetectedAt:    time.Now(),
+		Status:        "declared",
+		ImpactedUsers: dm.estimateImpactedUsers(affectedSystems),
 	}
 
 	now := time.Now()
@@ -105,8 +109,15 @@ func (dm *DisasterManager) activateDRPlan(plan *DisasterRecoveryPlan, event *Dis
 
 	fmt.Printf("DR Plan activated: %s for event: %s\n", plan.Name, event.Description)
 
-	// Execute DR steps (in production, this would trigger actual recovery procedures)
-	// For now, just log the activation
+	// Real logic: If plan contains a failover step, trigger it
+	if dm.recoveryEngine != nil && plan.Type == "network_outage" {
+		// Mocking IDs for demo purposes, in production these come from plan.Resources
+		go dm.recoveryEngine.Failover(1, 2)
+	}
+
+	event.Status = "recovering"
+	dm.db.Save(event)
+
 	return nil
 }
 

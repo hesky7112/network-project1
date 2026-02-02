@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -277,6 +278,10 @@ func (h *APIHandlers) ResetPassword(c *gin.Context) {
 
 func (h *APIHandlers) GetCurrentUser(c *gin.Context) {
 	h.authService.GetCurrentUser(c)
+}
+
+func (h *APIHandlers) ListPublicRoles(c *gin.Context) {
+	h.authService.ListPublicRoles(c)
 }
 
 func (h *APIHandlers) GetLatestHealthAnalysis(c *gin.Context) {
@@ -901,10 +906,35 @@ func (h *APIHandlers) UpdateUser(c *gin.Context) {
 		return
 	}
 
+	// Capture Old State
+	var oldUser models.User
+	h.DB.First(&oldUser, id)
+	oldState, _ := json.Marshal(oldUser)
+
 	if err := h.DB.Model(&models.User{}).Where("id = ?", id).Update("role", input.Role).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	// Capture New State
+	var newUser models.User
+	h.DB.First(&newUser, id)
+	newState, _ := json.Marshal(newUser)
+
+	// High Fidelity Audit
+	h.rbac.LogAccessWithState(
+		c.GetUint("user_id"),
+		c.GetString("username"),
+		"update",
+		"users",
+		newUser.ID,
+		c.ClientIP(),
+		c.Request.UserAgent(),
+		true,
+		fmt.Sprintf("User %s role updated to %s", newUser.Username, input.Role),
+		string(oldState),
+		string(newState),
+	)
 
 	c.JSON(http.StatusOK, gin.H{"message": "User updated successfully"})
 }
@@ -973,10 +1003,34 @@ func (h *APIHandlers) UpdateRole(c *gin.Context) {
 		return
 	}
 
+	// Capture Old State
+	var oldRole auth.Role
+	h.DB.First(&oldRole, role.ID)
+	oldState, _ := json.Marshal(oldRole)
+
 	if err := h.rbac.UpdateRole(&role); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	// Capture New State
+	newState, _ := json.Marshal(role)
+
+	// High Fidelity Audit
+	h.rbac.LogAccessWithState(
+		c.GetUint("user_id"),
+		c.GetString("username"),
+		"update",
+		"roles",
+		role.ID,
+		c.ClientIP(),
+		c.Request.UserAgent(),
+		true,
+		fmt.Sprintf("Role %s re-calibrated", role.Name),
+		string(oldState),
+		string(newState),
+	)
+
 	c.JSON(http.StatusOK, role)
 }
 

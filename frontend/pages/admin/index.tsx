@@ -36,7 +36,7 @@ import Link from 'next/link';
 // Dynamically import heavy/client-only modules
 const NetworkMap = dynamic(() => import('@/components/visualizations/NetworkMap'), {
     ssr: false,
-    loading: () => <div className="h-full w-full bg-black/40 animate-pulse rounded-2xl border border-white/5 flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-600">Initializing_Spatial_Layers...</div>
+    loading: () => <div className="h-full w-full bg-black/40 animate-pulse rounded-2xl border border-white/5 flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-600">Loading Network Map...</div>
 });
 
 const WebTerminal = dynamic(() => import('@/components/visualizations/WebTerminal').then(mod => ({ default: mod.WebTerminal })), {
@@ -83,7 +83,7 @@ export default function AdminCommandCenter() {
                 setUsers(usersRes.map((u: any) => ({
                     id: u.id,
                     username: u.username,
-                    service_type: u.role === 'admin' ? 'enterprise' : 'hotspot',
+                    service_type: u.role === 'admin' || u.role === 'Administrator' ? 'enterprise' : 'hotspot',
                     lat: -1.286389 + (Math.random() * 0.05), // Mock user location
                     lng: 36.817223 + (Math.random() * 0.05)
                 })));
@@ -110,14 +110,14 @@ export default function AdminCommandCenter() {
     const systemIntegrity = health?.score ? health.score : (activeNodes > 0 ? 98.2 : 0);
 
     const stats = [
-        { label: "Network_Capacity", value: activeNodes > 0 ? 100 - (avgCpu || 10) : 0, suffix: "%", icon: Zap, color: "text-alien-green" },
-        { label: "Active_Terminals", value: activeNodes, suffix: "", icon: Users, color: "text-blue-400" },
-        { label: "System_Integrity", value: systemIntegrity, suffix: "%", icon: Shield, color: "text-stardust-violet" },
-        { label: "Core_Compute", value: avgCpu || 0, suffix: "%", icon: Cpu, color: "text-indigo-400" }
+        { label: "Network Capacity", value: activeNodes > 0 ? 100 - (avgCpu || 10) : 0, suffix: "%", icon: Zap, color: "text-alien-green" },
+        { label: "Active Devices", value: activeNodes, suffix: "", icon: Users, color: "text-blue-400" },
+        { label: "System Health", value: systemIntegrity, suffix: "%", icon: Shield, color: "text-stardust-violet" },
+        { label: "CPU Usage", value: avgCpu || 0, suffix: "%", icon: Cpu, color: "text-indigo-400" }
     ];
 
     return (
-        <Layout title="COMMAND_CENTER | ALIEN_NET">
+        <Layout title="Admin Dashboard | Network Solutions">
             <div className="min-h-screen bg-oled-black text-white p-4 lg:p-8 space-y-8 relative overflow-hidden">
 
                 {/* Visual Flair: Background Grids */}
@@ -135,7 +135,7 @@ export default function AdminCommandCenter() {
                                     <div className="p-3 bg-white/5 border border-white/10 rounded-sm">
                                         <TerminalIcon className="h-8 w-8 text-slate-500" />
                                     </div>
-                                    Command_<span className="text-stardust-violet">Center</span>
+                                    Admin Dashboard
                                 </h1>
                                 <div className="flex items-center gap-4 mt-3 ml-1">
                                     <p className="text-[9px] font-mono text-slate-500 uppercase tracking-[0.4em]">
@@ -144,7 +144,7 @@ export default function AdminCommandCenter() {
                                     <div className="h-[1px] w-12 bg-white/10" />
                                     <div className="text-alien-green text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
                                         <div className="w-1.5 h-1.5 rounded-full bg-alien-green animate-pulse" />
-                                        Neural_Link_Stable
+                                        Connection Stable
                                     </div>
                                 </div>
                             </div>
@@ -155,7 +155,7 @@ export default function AdminCommandCenter() {
                                     <div className="text-xs font-mono font-bold tracking-widest">429:12:05:41</div>
                                 </div>
                                 <Button className="h-12 px-6 bg-stardust-violet/20 border border-stardust-violet/30 hover:bg-stardust-violet/30 text-stardust-violet text-[10px] font-black uppercase tracking-[0.2em]" style={{ borderRadius: '2px' }}>
-                                    <Zap className="mr-2 h-3.5 w-3.5" /> Force_Re-Sync
+                                    <Zap className="mr-2 h-3.5 w-3.5" /> Sync Now
                                 </Button>
                                 <Button className="h-12 w-12 p-0 bg-white/5 border border-white/10 hover:bg-white/10 text-slate-400" style={{ borderRadius: '2px' }}>
                                     <Settings className="h-4 w-4" />
@@ -166,32 +166,38 @@ export default function AdminCommandCenter() {
 
                     {/* STATS ROW */}
                     <StaggerList className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-                        {stats.map((stat, i) => (
-                            <StaggerItem key={i}>
-                                <SoftLift>
-                                    <GlassWrapper className="p-6 h-full flex flex-col justify-between bg-white/[0.02] border-white/5 hover:border-white/10 transition-all rounded-sm relative group overflow-hidden">
-                                        <div className="absolute -right-2 -top-2 opacity-5 group-hover:opacity-10 transition-opacity">
-                                            <stat.icon className="h-24 w-24" />
-                                        </div>
-                                        <div className="flex justify-between items-start mb-6">
-                                            <div className={cn("p-2.5 rounded-sm border bg-white/5", stat.color, "border-white/5")}>
-                                                <stat.icon className="h-5 w-5" />
+                        {loading ? (
+                            Array(4).fill(0).map((_, i) => (
+                                <div key={i} className="h-32 bg-white/[0.02] border border-white/5 animate-pulse rounded-sm" />
+                            ))
+                        ) : (
+                            stats.map((stat, i) => (
+                                <StaggerItem key={i}>
+                                    <SoftLift>
+                                        <GlassWrapper className="p-6 h-full flex flex-col justify-between bg-white/[0.02] border-white/5 hover:border-white/10 transition-all rounded-sm relative group overflow-hidden">
+                                            <div className="absolute -right-2 -top-2 opacity-5 group-hover:opacity-10 transition-opacity">
+                                                <stat.icon className="h-24 w-24" />
                                             </div>
-                                            <div className="h-1 w-12 bg-white/5 mt-4" />
-                                        </div>
-                                        <div>
-                                            <div className="text-4xl font-black italic tracking-tighter text-white flex items-end gap-1">
-                                                <CountUp value={stat.value} duration={1.5} />
-                                                <span className="text-lg text-slate-500 not-italic">{stat.suffix}</span>
+                                            <div className="flex justify-between items-start mb-6">
+                                                <div className={cn("p-2.5 rounded-sm border bg-white/5", stat.color, "border-white/5")}>
+                                                    <stat.icon className="h-5 w-5" />
+                                                </div>
+                                                <div className="h-1 w-12 bg-white/5 mt-4" />
                                             </div>
-                                            <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-2">
-                                                {stat.label}
+                                            <div>
+                                                <div className="text-4xl font-black italic tracking-tighter text-white flex items-end gap-1">
+                                                    <CountUp value={stat.value} duration={1.5} />
+                                                    <span className="text-lg text-slate-500 not-italic">{stat.suffix}</span>
+                                                </div>
+                                                <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-2">
+                                                    {stat.label}
+                                                </div>
                                             </div>
-                                        </div>
-                                    </GlassWrapper>
-                                </SoftLift>
-                            </StaggerItem>
-                        ))}
+                                        </GlassWrapper>
+                                    </SoftLift>
+                                </StaggerItem>
+                            ))
+                        )}
                     </StaggerList>
 
                     {/* MAIN GRID */}
@@ -206,11 +212,11 @@ export default function AdminCommandCenter() {
                                     <div className="absolute top-6 left-6 z-20 flex items-center gap-3">
                                         <div className="px-3 py-1.5 bg-black/60 backdrop-blur-md border border-white/10 rounded-sm">
                                             <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
-                                                <Globe className="h-3 w-3 text-blue-400" /> Spatial_Intelligence_Grid
+                                                <Globe className="h-3 w-3 text-blue-400" /> Network Map
                                             </h3>
                                         </div>
                                         <div className="px-3 py-1.5 bg-black/60 backdrop-blur-md border border-white/10 rounded-sm">
-                                            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">LIVE_SYNC</span>
+                                            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">LIVE</span>
                                         </div>
                                     </div>
                                     <div className="absolute top-6 right-6 z-20 flex gap-2">
@@ -228,7 +234,7 @@ export default function AdminCommandCenter() {
                                     <div className="absolute bottom-6 left-6 z-20 space-y-2">
                                         <div className="p-4 bg-black/60 backdrop-blur-md border border-white/10 rounded-sm w-64">
                                             <div className="flex justify-between items-center mb-3">
-                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Active_Nodes</span>
+                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Active Devices</span>
                                                 <span className="text-[9px] font-mono text-white">12/12</span>
                                             </div>
                                             <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
@@ -245,7 +251,7 @@ export default function AdminCommandCenter() {
                                     <div className="px-6 py-3 border-b border-white/5 flex justify-between items-center bg-black/20">
                                         <div className="flex items-center gap-3">
                                             <TerminalIcon className="h-3.5 w-3.5 text-slate-500" />
-                                            <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Primary_Log_Stream</span>
+                                            <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">System Logs</span>
                                         </div>
                                         <div className="flex gap-1.5">
                                             <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/20 border border-emerald-500/40" />
@@ -254,7 +260,7 @@ export default function AdminCommandCenter() {
                                         </div>
                                     </div>
                                     <div className="p-1">
-                                        <WebTerminal title="SYSTEM_KERNEL" height={220} />
+                                        <WebTerminal title="System Status" height={220} />
                                     </div>
                                 </div>
                             </BlurReveal>
@@ -267,19 +273,19 @@ export default function AdminCommandCenter() {
                             <BlurReveal delay={0.4}>
                                 <div className="bg-white/[0.02] border border-white/5 rounded-sm p-6 space-y-6">
                                     <h3 className="text-[11px] font-black text-white uppercase tracking-[0.2em] border-b border-white/5 pb-4 flex items-center gap-2">
-                                        <Zap className="h-4 w-4 text-stardust-violet" /> Quick_Execution
+                                        <Zap className="h-4 w-4 text-stardust-violet" /> Quick Links
                                     </h3>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
                                         {[
-                                            { label: "Operator_Matrix", icon: Users, color: "text-emerald-500", href: "/admin/users" },
-                                            { label: "Node_Inventory", icon: Cpu, color: "text-blue-400", href: "/admin/inventory" },
-                                            { label: "IPAM_Controller", icon: Layers, color: "text-indigo-400", href: "/admin/ipam" },
-                                            { label: "Incident_Stream", icon: AlertTriangle, color: "text-red-500", href: "/admin/tickets" },
-                                            { label: "Service_Market", icon: Package, iconColor: "text-amber-500", href: "/admin/hotspot" },
-                                            { label: "Neural_Nexus", icon: Activity, color: "text-stardust-violet", href: "/admin/nexus" },
-                                            { label: "Topo_Analyzer", icon: MapIcon, color: "text-sky-400", href: "/admin/topology" },
-                                            { label: "Seller_Queue", icon: Shield, color: "text-earth-green", href: "/admin/sellers" },
-                                            { label: "System_Config", icon: Settings, color: "text-slate-500", href: "/admin/settings" }
+                                            { label: "User Management", icon: Users, color: "text-emerald-500", href: "/admin/users" },
+                                            { label: "Device Directory", icon: Cpu, color: "text-blue-400", href: "/admin/inventory" },
+                                            { label: "IP Management", icon: Layers, color: "text-indigo-400", href: "/admin/ipam" },
+                                            { label: "Support Tickets", icon: AlertTriangle, color: "text-red-500", href: "/admin/tickets" },
+                                            { label: "Hotspot Plans", icon: Package, iconColor: "text-amber-500", href: "/admin/hotspot" },
+                                            { label: "System Health", icon: Activity, color: "text-stardust-violet", href: "/admin/nexus" },
+                                            { label: "Network Topology", icon: MapIcon, color: "text-sky-400", href: "/admin/topology" },
+                                            { label: "Partner Portal", icon: Shield, color: "text-earth-green", href: "/admin/sellers" },
+                                            { label: "Settings", icon: Settings, color: "text-slate-500", href: "/admin/settings" }
                                         ].map((act, i) => (
                                             <Link href={act.href} key={i}>
                                                 <Button variant="outline" className="w-full justify-start h-14 bg-white/[0.03] border-white/5 hover:bg-white/10 hover:border-white/10 text-[10px] font-black uppercase tracking-widest gap-4 group transition-all" style={{ borderRadius: '2px' }}>
@@ -300,7 +306,7 @@ export default function AdminCommandCenter() {
                                 <div className="bg-white/[0.02] border border-white/5 rounded-sm p-6">
                                     <h3 className="text-[11px] font-black text-white uppercase tracking-[0.2em] border-b border-white/5 pb-4 mb-6 flex items-center justify-between">
                                         <div className="flex items-center gap-2">
-                                            <Activity className="h-4 w-4 text-blue-400" /> Telemetry_X
+                                            <Activity className="h-4 w-4 text-blue-400" /> Live Analytics
                                         </div>
                                         <span className="text-[9px] text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-sm">OPTIMIZED</span>
                                     </h3>
@@ -312,9 +318,9 @@ export default function AdminCommandCenter() {
 
                                         <div className="space-y-4 pt-4 border-t border-white/5">
                                             {[
-                                                { label: "Kernel_Load", val: 24, color: "bg-blue-500" },
-                                                { label: "Memory_Heap", val: 68, color: "bg-stardust-violet" },
-                                                { label: "Active_Sockets", val: 12, color: "bg-alien-green" }
+                                                { label: "System Load", val: 24, color: "bg-blue-500" },
+                                                { label: "Memory Usage", val: 68, color: "bg-stardust-violet" },
+                                                { label: "Active Connections", val: 12, color: "bg-alien-green" }
                                             ].map((m, i) => (
                                                 <div key={i} className="space-y-2">
                                                     <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-slate-500">
@@ -366,7 +372,7 @@ export default function AdminCommandCenter() {
                     <div className="pt-12 pb-8 flex flex-col items-center gap-4 opacity-30 group hover:opacity-100 transition-opacity">
                         <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                         <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.5em] text-center">
-                            Alien_Net_Infrastructure &middot; Deep_Space_Network_Division &middot; 2026_All_Rights_Reserved
+                            Network Solutions &middot; Enterprise Network Solutions &middot; 2026_All_Rights_Reserved
                         </p>
                     </div>
 

@@ -151,7 +151,7 @@ export default function PricingPage() {
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-center">
                         <div className="lg:col-span-1 space-y-6">
-                            <h2 className="text-3xl font-black uppercase tracking-tighter italic leading-none">Standard_Core_Architect</h2>
+                            <h2 className="text-3xl font-black uppercase tracking-tighter italic leading-none">Pro Network Manager</h2>
                             <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest leading-loose">
                                 Every package includes our base management layer, providing unified control across all infrastructure nodes.
                             </p>

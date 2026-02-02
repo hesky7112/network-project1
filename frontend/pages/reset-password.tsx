@@ -75,7 +75,7 @@ export default function ResetPassword() {
     return (
       <div className="min-h-screen bg-black text-slate-400 flex items-center justify-center p-6 font-sans overflow-hidden">
         <Head>
-          <title>Access Restored | Alien Net</title>
+          <title>Access Restored | Network Solutions</title>
         </Head>
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -87,7 +87,7 @@ export default function ResetPassword() {
               <Shield className="h-8 w-8 text-alien-green animate-pulse" />
             </div>
             <h1 className="text-3xl font-black text-white uppercase tracking-tighter">Access Restored</h1>
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-alien-green">Neural identity synchronized</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-alien-green">Identity verified</p>
           </div>
 
           <div className="bg-[#050505] border border-white/5 p-8 relative overflow-hidden text-center" style={{ borderRadius: '2px' }}>
@@ -110,7 +110,7 @@ export default function ResetPassword() {
   return (
     <div className="min-h-screen bg-black text-slate-400 flex items-center justify-center p-6 font-sans overflow-hidden">
       <Head>
-        <title>Finalize Recovery | Alien Net</title>
+        <title>Finalize Recovery | Network Solutions</title>
       </Head>
 
       <div className="fixed inset-0 pointer-events-none opacity-5">

@@ -111,7 +111,7 @@ export default function Marketplace() {
                     <div>
                         <h2 className="text-2xl font-black text-white uppercase tracking-tighter italic flex items-center gap-3">
                             <ShoppingCart className="h-7 w-7 text-stardust-violet" />
-                            Alien_Module_Marketplace
+                            App Marketplace
                         </h2>
                         <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">
                             Deploy high-performance mini-apps using Master Primitives
@@ -123,7 +123,7 @@ export default function Marketplace() {
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 group-focus-within:text-stardust-violet transition-colors" />
                             <input
                                 type="text"
-                                placeholder="Search_Modules..."
+                                placeholder="Search Apps..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="bg-oled-black border border-white/5 pl-10 pr-4 py-2 text-[10px] font-black text-white uppercase tracking-widest focus:outline-none focus:border-stardust-violet/30 w-full sm:w-64"
@@ -135,7 +135,7 @@ export default function Marketplace() {
                             className="bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[10px] font-black uppercase tracking-widest"
                             style={{ borderRadius: '2px' }}
                         >
-                            <Package className="mr-2 h-4 w-4 text-stardust-violet" /> Create_Module
+                            <Package className="mr-2 h-4 w-4 text-stardust-violet" /> Create App
                         </Button>
                     </div>
                 </div>
@@ -164,12 +164,12 @@ export default function Marketplace() {
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-20 gap-4">
                         <Loader2 className="h-8 w-8 text-stardust-violet animate-spin" />
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Synching_With_Neural_Registry...</span>
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Loading Marketplace...</span>
                     </div>
                 ) : filteredModules.length === 0 ? (
                     <div className="text-center py-20 border border-dashed border-white/5" style={{ borderRadius: '4px' }}>
                         <Package className="h-10 w-10 text-slate-800 mx-auto mb-4" />
-                        <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest">No_Modules_Found</h3>
+                        <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest">No Apps Found</h3>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
@@ -292,9 +292,9 @@ export default function Marketplace() {
                             <Package className="h-6 w-6 text-stardust-violet" />
                         </div>
                         <div>
-                            <h4 className="text-[10px] font-black text-white uppercase tracking-widest italic">Become_An_Alien_Developer</h4>
+                            <h4 className="text-[10px] font-black text-white uppercase tracking-widest italic">Become a Developer</h4>
                             <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest mt-1">
-                                Build modules using our Master Primitives and monetize your creation across Kenya.
+                                Build apps using our core components and monetize your creation across Kenya.
                             </p>
                         </div>
                     </div>
@@ -302,7 +302,7 @@ export default function Marketplace() {
                         variant="ghost"
                         className="text-[10px] font-black uppercase tracking-widest text-stardust-violet hover:bg-stardust-violet/10 z-10"
                     >
-                        Learn_More <ArrowRight className="ml-2 h-4 w-4" />
+                        Learn More <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                 </div>
             </div>
@@ -319,12 +319,12 @@ export default function Marketplace() {
                             <div className="flex gap-2">
                                 {selectedModule.requires_hal && (
                                     <div className="px-2 py-1 bg-cyber-blue/10 border border-cyber-blue/30 text-[8px] font-black text-cyber-blue uppercase tracking-widest" style={{ borderRadius: '2px' }}>
-                                        HAL_Required
+                                        Hardware Access Required
                                     </div>
                                 )}
                                 {selectedModule.requires_gpu && (
                                     <div className="px-2 py-1 bg-earth-green/10 border border-earth-green/30 text-[8px] font-black text-earth-green uppercase tracking-widest" style={{ borderRadius: '2px' }}>
-                                        GPU_Accelerated
+                                        High Performance (GPU)
                                     </div>
                                 )}
                             </div>
@@ -334,7 +334,7 @@ export default function Marketplace() {
                             <div className="flex justify-between items-start mb-4">
                                 <div>
                                     <span className="text-[9px] font-black text-stardust-violet uppercase tracking-widest border-b border-stardust-violet/30 pb-1 mb-2 inline-block">
-                                        Module_Details v{selectedModule.version}
+                                        App Details v{selectedModule.version}
                                     </span>
                                     <h2 className="text-xl font-black text-white uppercase tracking-tighter italic">
                                         {selectedModule.name}
@@ -354,7 +354,7 @@ export default function Marketplace() {
                                 <div>
                                     <h4 className="text-[9px] font-black text-white uppercase tracking-widest mb-2 flex items-center gap-2">
                                         <Zap className="h-3 w-3 text-stardust-violet" />
-                                        Core_Primitives
+                                        Core Components
                                     </h4>
                                     <div className="flex flex-wrap gap-2">
                                         {selectedModule.primitives.map((p, idx) => (
@@ -382,7 +382,7 @@ export default function Marketplace() {
                                     className="flex-1 h-10 text-[10px] font-black uppercase tracking-widest bg-stardust-violet text-black hover:bg-white transition-colors"
                                     style={{ borderRadius: '2px' }}
                                 >
-                                    {ownedModuleIds.has(selectedModule.id) ? 'INSTALLED_On_Node' : 'Confirm_License'}
+                                    {ownedModuleIds.has(selectedModule.id) ? 'INSTALLED' : 'Confirm Install'}
                                 </Button>
                                 <Button
                                     variant="outline"

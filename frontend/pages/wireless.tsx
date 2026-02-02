@@ -22,7 +22,7 @@ interface AccessPoint {
 
 export default function Wireless() {
     const [isProvisionOpen, setIsProvisionOpen] = useState(false)
-    const [newAP, setNewAP] = useState({ name: '', mac_address: '', ip_address: '', model: 'Alien-AP-6' })
+    const [newAP, setNewAP] = useState({ name: '', mac_address: '', ip_address: '', model: 'Network-AP-6' })
 
     const { data: aps, refetch } = useQuery<AccessPoint[]>({
         queryKey: ['wireless-aps'],
@@ -40,14 +40,14 @@ export default function Wireless() {
         onSuccess: () => {
             setIsProvisionOpen(false)
             refetch()
-            setNewAP({ name: '', mac_address: '', ip_address: '', model: 'Alien-AP-6' })
+            setNewAP({ name: '', mac_address: '', ip_address: '', model: 'Network-AP-6' })
         }
     })
 
     return (
         <Layout title="Wireless Controller">
             <Head>
-                <title>Wireless | Alien Net</title>
+                <title>Wireless | Network Solutions</title>
             </Head>
 
             <div className="space-y-6">
@@ -125,9 +125,9 @@ export default function Wireless() {
                                 value={newAP.model}
                                 onChange={e => setNewAP({ ...newAP, model: e.target.value })}
                             >
-                                <option value="Alien-AP-6">Alien AP 6 (Wi-Fi 6)</option>
-                                <option value="Alien-AP-6E">Alien AP 6E (Tri-Band)</option>
-                                <option value="Alien-AP-PRO">Alien AP Pro</option>
+                                <option value="Network-AP-6">Network AP 6 (Wi-Fi 6)</option>
+                                <option value="Network-AP-6E">Network AP 6E (Tri-Band)</option>
+                                <option value="Network-AP-PRO">Network AP Pro</option>
                             </select>
                         </div>
                         <div className="flex justify-end gap-2">

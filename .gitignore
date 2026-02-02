@@ -7,11 +7,17 @@
 main
 server
 temp
+temp.exe
 test_build
+test_build.exe
 backend.pid
+frontend.pid
 
 # Logs
 *.log
+backend.log
+frontend.log
+server.log
 
 # Database
 *.db

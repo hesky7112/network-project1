@@ -45,6 +45,18 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
           <p className="mt-2 text-gray-600">
             {this.state.error?.message || 'An unexpected error occurred'}
           </p>
+
+          {process.env.NODE_ENV === 'development' && this.state.error && (
+            <details className="mt-4 text-left max-w-2xl">
+              <summary className="cursor-pointer text-sm text-gray-500">
+                Error Details (Development Only)
+              </summary>
+              <pre className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-auto">
+                {this.state.error.stack || this.state.error.toString()}
+              </pre>
+            </details>
+          )}
+
           <Button
             onClick={this.handleReset}
             className="mt-6"
@@ -69,9 +81,9 @@ export function withErrorBoundary<T extends object>(
       <ErrorBoundary
         fallback={
           FallbackComponent ? (
-            <FallbackComponent 
-              error={null} 
-              reset={() => window.location.reload()} 
+            <FallbackComponent
+              error={null}
+              reset={() => window.location.reload()}
             />
           ) : undefined
         }

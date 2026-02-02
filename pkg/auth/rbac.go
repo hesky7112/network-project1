@@ -17,6 +17,7 @@ type RBACManager struct {
 // Role represents a user role
 type Role struct {
 	ID          uint      `json:"id" gorm:"primaryKey"`
+	ParentID    *uint     `json:"parent_id" gorm:"index"` // Support for Hierarchical RBAC
 	Name        string    `json:"name" gorm:"uniqueIndex"`
 	Description string    `json:"description"`
 	Permissions string    `json:"permissions" gorm:"type:jsonb"`
@@ -52,6 +53,8 @@ type AuditLog struct {
 	UserAgent  string    `json:"user_agent"`
 	Success    bool      `json:"success"`
 	Details    string    `json:"details"`
+	OldState   string    `json:"old_state" gorm:"type:jsonb"` // Captured state before change
+	NewState   string    `json:"new_state" gorm:"type:jsonb"` // Captured state after change
 	Timestamp  time.Time `json:"timestamp" gorm:"index"`
 }
 
@@ -192,7 +195,25 @@ func (rbac *RBACManager) UpdateRole(role *Role) error {
 	if role.ID <= 4 || role.Level <= 4 {
 		return errors.New("system roles cannot be modified")
 	}
-	return rbac.db.Save(role).Error
+
+	// Fetch old role to check for name changes
+	var oldRole Role
+	if err := rbac.db.First(&oldRole, role.ID).Error; err != nil {
+		return err
+	}
+
+	if err := rbac.db.Save(role).Error; err != nil {
+		return err
+	}
+
+	// Propagate name change to User table for JWT claim consistency
+	if oldRole.Name != role.Name {
+		// Use raw SQL to sidestep models dependency and ensure fast bulk update
+		rbac.db.Exec("UPDATE users SET role = ? WHERE id IN (SELECT user_id FROM user_roles WHERE role_id = ?)",
+			role.Name, role.ID)
+	}
+
+	return nil
 }
 
 // DeleteRole removes a custom role
@@ -242,11 +263,24 @@ func (rbac *RBACManager) HasPermission(userID uint, resource, action string) boo
 	}
 
 	for _, role := range roles {
-		var permissions map[string][]string
-		if err := json.Unmarshal([]byte(role.Permissions), &permissions); err != nil {
-			continue
+		if rbac.checkRolePermission(role, resource, action, make(map[uint]bool)) {
+			return true
 		}
+	}
 
+	return false
+}
+
+// checkRolePermission recursively checks permissions and inheritance
+func (rbac *RBACManager) checkRolePermission(role Role, resource, action string, visited map[uint]bool) bool {
+	if visited[role.ID] {
+		return false // Prevent circular inheritance
+	}
+	visited[role.ID] = true
+
+	// Check current role permissions
+	var permissions map[string][]string
+	if err := json.Unmarshal([]byte(role.Permissions), &permissions); err == nil {
 		if actions, ok := permissions[resource]; ok {
 			for _, a := range actions {
 				if a == action {
@@ -256,11 +290,24 @@ func (rbac *RBACManager) HasPermission(userID uint, resource, action string) boo
 		}
 	}
 
+	// Check parent permissions
+	if role.ParentID != nil {
+		var parent Role
+		if err := rbac.db.First(&parent, *role.ParentID).Error; err == nil {
+			return rbac.checkRolePermission(parent, resource, action, visited)
+		}
+	}
+
 	return false
 }
 
 // LogAccess logs user access and actions
 func (rbac *RBACManager) LogAccess(userID uint, username, action, resource string, resourceID uint, ipAddress, userAgent string, success bool, details string) {
+	rbac.LogAccessWithState(userID, username, action, resource, resourceID, ipAddress, userAgent, success, details, "", "")
+}
+
+// LogAccessWithState captures state snapshots for advanced auditing
+func (rbac *RBACManager) LogAccessWithState(userID uint, username, action, resource string, resourceID uint, ipAddress, userAgent string, success bool, details, oldState, newState string) {
 	log := &AuditLog{
 		UserID:     userID,
 		Username:   username,
@@ -271,6 +318,8 @@ func (rbac *RBACManager) LogAccess(userID uint, username, action, resource strin
 		UserAgent:  userAgent,
 		Success:    success,
 		Details:    MaskPII(details),
+		OldState:   oldState,
+		NewState:   newState,
 		Timestamp:  time.Now(),
 	}
 

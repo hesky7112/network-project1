@@ -240,7 +240,7 @@ export default function CreateModuleWizard() {
                                             {formData.template === 'branded' && <CheckCircle className="h-5 w-5 text-stardust-violet" />}
                                         </div>
                                         <div>
-                                            <h3 className="text-white font-bold uppercase tracking-wider">Alien Branded</h3>
+                                            <h3 className="text-white font-bold uppercase tracking-wider">Standard Branding</h3>
                                             <p className="text-xs text-slate-400 mt-1">Pre-configured with Neural Net Dark Mode, Tailwind, and custom standard components.</p>
                                         </div>
                                     </div>
@@ -304,7 +304,7 @@ export default function CreateModuleWizard() {
                                     <div className="mt-1 text-sm font-bold text-white flex items-center gap-2">
                                         {formData.template === 'branded' ? (
                                             <>
-                                                <Zap className="h-4 w-4 text-stardust-violet" /> Alien Branded
+                                                <Zap className="h-4 w-4 text-stardust-violet" /> Standard Branding
                                             </>
                                         ) : (
                                             <>

@@ -82,81 +82,82 @@ type HealthAnalysis struct {
 
 // SystemHealthMetrics tracks system-level health
 type SystemHealthMetrics struct {
-	CPUUsageAvg        float64 `json:"cpu_usage_avg"`
-	MemoryUsageAvg     float64 `json:"memory_usage_avg"`
-	DiskUsageAvg       float64 `json:"disk_usage_avg"`
-	ActiveDevices      int     `json:"active_devices"`
-	FailedDevices      int     `json:"failed_devices"`
-	UptimePercentage   float64 `json:"uptime_percentage"`
-	ResponseTimeAvg    float64 `json:"response_time_avg"`
-	ErrorRate          float64 `json:"error_rate"`
+	CPUUsageAvg      float64 `json:"cpu_usage_avg"`
+	MemoryUsageAvg   float64 `json:"memory_usage_avg"`
+	DiskUsageAvg     float64 `json:"disk_usage_avg"`
+	ActiveDevices    int     `json:"active_devices"`
+	FailedDevices    int     `json:"failed_devices"`
+	UptimePercentage float64 `json:"uptime_percentage"`
+	ResponseTimeAvg  float64 `json:"response_time_avg"`
+	ErrorRate        float64 `json:"error_rate"`
 }
 
 // NetworkHealthMetrics tracks network-level health
 type NetworkHealthMetrics struct {
-	Bandwidth          float64 `json:"bandwidth"`
-	PacketLoss         float64 `json:"packet_loss"`
-	Latency            float64 `json:"latency"`
-	Jitter             float64 `json:"jitter"`
+	Bandwidth             float64 `json:"bandwidth"`
+	PacketLoss            float64 `json:"packet_loss"`
+	Latency               float64 `json:"latency"`
+	Jitter                float64 `json:"jitter"`
 	ThroughputUtilization float64 `json:"throughput_utilization"`
-	ActiveConnections  int     `json:"active_connections"`
-	DroppedPackets     int64   `json:"dropped_packets"`
-	ErrorPackets       int64   `json:"error_packets"`
-	TopologyHealth     float64 `json:"topology_health"`
+	ActiveConnections     int     `json:"active_connections"`
+	DroppedPackets        int64   `json:"dropped_packets"`
+	ErrorPackets          int64   `json:"error_packets"`
+	TopologyHealth        float64 `json:"topology_health"`
 }
 
 // SecurityHealthMetrics tracks security-level health
 type SecurityHealthMetrics struct {
-	OpenVulnerabilities int     `json:"open_vulnerabilities"`
-	FailedLogins        int     `json:"failed_logins"`
-	SuspiciousActivity  int     `json:"suspicious_activity"`
-	FirewallRuleViolations int  `json:"firewall_rule_violations"`
-	ComplianceScore     float64 `json:"compliance_score"`
-	LastSecurityScan    time.Time `json:"last_security_scan"`
+	OpenVulnerabilities    int       `json:"open_vulnerabilities"`
+	FailedLogins           int       `json:"failed_logins"`
+	SuspiciousActivity     int       `json:"suspicious_activity"`
+	FirewallRuleViolations int       `json:"firewall_rule_violations"`
+	ComplianceScore        float64   `json:"compliance_score"`
+	LastSecurityScan       time.Time `json:"last_security_scan"`
 }
 
 // HealthIssue represents a detected health issue
 type HealthIssue struct {
-	ID          uint          `json:"id" gorm:"primaryKey"`
-	AnalysisID  uint          `json:"analysis_id"`
-	Severity    SeverityLevel `json:"severity"` // critical, high, medium, low
-	Category    string        `json:"category"` // system, network, security, performance
-	Title       string        `json:"title"`
-	Description string        `json:"description"`
-	DeviceID    *uint         `json:"device_id"`
-	DeviceName  string        `json:"device_name"`
-	Metric      string        `json:"metric"`
-	CurrentValue float64      `json:"current_value"`
-	ThresholdValue float64   `json:"threshold_value"`
-	Impact      string        `json:"impact"`
-	DetectedAt  time.Time     `json:"detected_at"`
-	ResolvedAt  *time.Time    `json:"resolved_at"`
-	AutoFixable bool          `json:"auto_fixable"`
+	ID             uint          `json:"id" gorm:"primaryKey"`
+	AnalysisID     uint          `json:"analysis_id"`
+	Severity       SeverityLevel `json:"severity"` // critical, high, medium, low
+	Category       string        `json:"category"` // system, network, security, performance
+	Title          string        `json:"title"`
+	Description    string        `json:"description"`
+	DeviceID       *uint         `json:"device_id"`
+	DeviceName     string        `json:"device_name"`
+	Metric         string        `json:"metric"`
+	CurrentValue   float64       `json:"current_value"`
+	ThresholdValue float64       `json:"threshold_value"`
+	Impact         string        `json:"impact"`
+	DetectedAt     time.Time     `json:"detected_at"`
+	ResolvedAt     *time.Time    `json:"resolved_at"`
+	AutoFixable    bool          `json:"auto_fixable"`
 }
 
 // QuickFix represents an automated fix suggestion
 type QuickFix struct {
-	ID          uint      `json:"id" gorm:"primaryKey"`
-	IssueID     uint      `json:"issue_id"`
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	FixType     string    `json:"fix_type"` // automated, manual, hybrid
-	Commands    string    `json:"commands" gorm:"type:jsonb"`
-	EstimatedTime int     `json:"estimated_time"` // in seconds
-	RiskLevel   string    `json:"risk_level"` // low, medium, high
-	Prerequisites string  `json:"prerequisites" gorm:"type:jsonb"`
-	Rollback    string    `json:"rollback" gorm:"type:jsonb"`
-	AppliedAt   *time.Time `json:"applied_at"`
-	Success     bool      `json:"success"`
-	Result      string    `json:"result"`
+	ID            uint       `json:"id" gorm:"primaryKey"`
+	IssueID       uint       `json:"issue_id"`
+	Title         string     `json:"title"`
+	Description   string     `json:"description"`
+	FixType       string     `json:"fix_type"` // automated, manual, hybrid
+	Commands      string     `json:"commands" gorm:"type:jsonb"`
+	EstimatedTime int        `json:"estimated_time"` // in seconds
+	RiskLevel     string     `json:"risk_level"`     // low, medium, high
+	Prerequisites string     `json:"prerequisites" gorm:"type:jsonb"`
+	Rollback      string     `json:"rollback" gorm:"type:jsonb"`
+	AppliedAt     *time.Time `json:"applied_at"`
+	Success       bool       `json:"success"`
+	Result        string     `json:"result"`
 }
 
 // NewHealthAnalysisEngine creates a new health analysis engine
 func NewHealthAnalysisEngine(db *gorm.DB) *HealthAnalysisEngine {
+	re := NewRecoveryEngine(db)
 	engine := &HealthAnalysisEngine{
 		db:              db,
-		recoveryEngine:  NewRecoveryEngine(db),
-		disasterManager: NewDisasterManager(db),
+		recoveryEngine:  re,
+		disasterManager: NewDisasterManager(db, re),
 	}
 
 	return engine
@@ -238,10 +239,10 @@ func (hae *HealthAnalysisEngine) analyzeSystemHealth() (*SystemHealthMetrics, er
 
 	// Query device metrics from database
 	var deviceMetrics []struct {
-		CPUUsage    float64
-		MemoryUsage float64
-		DiskUsage   float64
-		Status      string
+		CPUUsage     float64
+		MemoryUsage  float64
+		DiskUsage    float64
+		Status       string
 		ResponseTime float64
 	}
 

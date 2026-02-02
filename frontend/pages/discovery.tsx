@@ -64,7 +64,7 @@ export default function Discovery() {
   }
 
   return (
-    <Layout title="Neural_Discovery_Terminal">
+    <Layout title="Network Discovery">
       <div className="min-h-screen bg-[#050505] text-slate-300 p-4 sm:p-8 space-y-8 relative overflow-hidden">
         {/* Background Visual Flair */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] rounded-full pointer-events-none" />
@@ -79,8 +79,8 @@ export default function Discovery() {
                   <Search className="h-6 w-6 text-indigo-400" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-black text-white uppercase tracking-tighter italic leading-none">Neural_Discovery_Terminal</h1>
-                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mt-2">Active_Heuristic_Network_Enumeration</p>
+                  <h1 className="text-3xl font-black text-white uppercase tracking-tighter italic leading-none">Network Discovery</h1>
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mt-2">Scan and Map Infrastructure</p>
                 </div>
               </div>
             </div>
@@ -91,7 +91,7 @@ export default function Discovery() {
                 className="bg-indigo-600/80 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest h-11 px-6 rounded-sm transition-all shadow-[0_0_15px_rgba(99,102,241,0.2)]"
               >
                 <Search className="mr-2 h-4 w-4" />
-                INITIATE_PROBE_SCAN
+                START SCAN
               </Button>
               <Button
                 variant="outline"

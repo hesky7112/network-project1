@@ -161,7 +161,7 @@ export default function DevicesPage() {
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-600 group-focus-within:text-stardust-violet transition-colors" />
                   <input
                     type="text"
-                    placeholder="SCAN_FOR_HOSTNAME, IP, OR ARCHITECTURE..."
+                    placeholder="SCAN_FOR_HOSTNAME, IP, OR MODEL/PLATFORM..."
                     className="w-full pl-12 pr-4 py-3 bg-black/40 border border-white/10 rounded-sm focus:ring-1 focus:ring-stardust-violet/50 focus:border-stardust-violet/50 text-[11px] font-black uppercase tracking-widest text-white placeholder:text-slate-600 outline-none transition-all italic"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}

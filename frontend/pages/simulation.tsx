@@ -108,7 +108,7 @@ export default function Simulation() {
     return (
         <Layout title="Network Simulation">
             <Head>
-                <title>Network Simulation | Alien Net</title>
+                <title>Network Simulation | Network Solutions</title>
             </Head>
 
             <div className="space-y-6">

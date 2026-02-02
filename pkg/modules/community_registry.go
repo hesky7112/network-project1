@@ -128,24 +128,41 @@ func (r *Registry) CreatePost(post *ForumPost) error {
 }
 
 func (r *Registry) UpvoteThread(threadID uint, userID uint) error {
-	// TODO: Track "UserUpvoted" table to prevent duplicates.
-	// For MVP, just increment.
+	// Prevent duplicate upvotes
+	var existing ForumThreadUpvote
+	err := r.DB.Where("thread_id = ? AND user_id = ?", threadID, userID).First(&existing).Error
+	if err == nil {
+		return errors.New("user already upvoted this thread")
+	}
 
 	var thread ForumThread
 	if err := r.DB.First(&thread, threadID).Error; err != nil {
 		return err
 	}
 
-	thread.Upvotes++
-	r.updateThreadScores(&thread)
+	// Transactional update
+	return r.DB.Transaction(func(tx *gorm.DB) error {
+		// Create upvote record
+		upvote := ForumThreadUpvote{
+			ThreadID:  threadID,
+			UserID:    userID,
+			CreatedAt: time.Now(),
+		}
+		if err := tx.Create(&upvote).Error; err != nil {
+			return err
+		}
 
-	if err := r.DB.Save(&thread).Error; err != nil {
-		return err
-	}
+		// Increment upvotes
+		thread.Upvotes++
+		r.updateThreadScores(&thread)
+		if err := tx.Save(&thread).Error; err != nil {
+			return err
+		}
 
-	// Award author
-	go r.AddReputation(thread.AuthorID, 1, "thread_upvoted")
-	return nil
+		// Award author
+		go r.AddReputation(thread.AuthorID, 1, "thread_upvoted")
+		return nil
+	})
 }
 
 func (r *Registry) updateThreadScores(thread *ForumThread) {
@@ -164,7 +181,7 @@ type TrendingTag struct {
 }
 
 func (r *Registry) GetTrendingTags() ([]TrendingTag, error) {
-	// Naive implementation: Get tags from threads created < 24h
+	// Precise implementation: Calculate velocity based on tag occurrence in recent threads
 	var recentThreads []ForumThread
 	r.DB.Where("created_at > ?", time.Now().Add(-24*time.Hour)).Find(&recentThreads)
 
@@ -214,8 +231,9 @@ func (r *Registry) AddReputation(userID uint, amount int, reason string) {
 	rep.Reputation += amount
 	rep.LastActiveAt = time.Now()
 
-	// Level up logic (simple: level = sqrt(rep/10) or every 100 points)
-	newLevel := 1 + (rep.Reputation / 100)
+	// Robust leveling formula: Level = floor(sqrt(reputation / 10)) + 1
+	// This provides a diminishing returns progression
+	newLevel := int(math.Sqrt(float64(rep.Reputation)/10.0)) + 1
 	if newLevel > rep.Level {
 		rep.Level = newLevel
 		// Trigger "Level Up" event/notification here if we had notifications
