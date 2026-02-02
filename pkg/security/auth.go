@@ -93,26 +93,15 @@ func (sa *SecureAuth) GenerateCSRFToken(sessionID string) string {
 
 // ValidateCSRFToken validates CSRF token
 func (sa *SecureAuth) ValidateCSRFToken(token, sessionID string) bool {
-	if len(token) != 64 { // 32 bytes = 64 hex chars
+	if len(token) != 64 {
 		return false
 	}
 
-	// Check recent timestamps (within 1 hour)
-	currentTime := time.Now().Unix()
-	for i := 0; i < 3600; i++ { // Check last hour
-		timestamp := currentTime - int64(i)
-		randomBytes := make([]byte, 16)
-		rand.Read(randomBytes)
-
-		combined := fmt.Sprintf("%s:%d:%x", sessionID, timestamp, randomBytes)
-		hash := argon2.IDKey([]byte(combined), []byte(sa.pepper), 1, 64*1024, 4, 32)
-
-		if hex.EncodeToString(hash) == token {
-			return true
-		}
-	}
-
-	return false
+	// In a stateless implementation without session storage, we can validate
+	// a hash of the sessionID + salted secret.
+	// For production, this should ideally check against a token stored in Redis/Session.
+	expected := sa.GenerateCSRFToken(sessionID)
+	return expected == token
 }
 
 // Password strength validator
@@ -189,17 +178,17 @@ func (sa *SecureAuth) ValidateAPIKey(apiKey string) error {
 
 // Rate limiting for authentication attempts
 type AuthRateLimiter struct {
-	attempts map[string][]time.Time
+	attempts    map[string][]time.Time
 	maxAttempts int
-	window time.Duration
+	window      time.Duration
 }
 
 // NewAuthRateLimiter creates a new auth rate limiter
 func NewAuthRateLimiter() *AuthRateLimiter {
 	return &AuthRateLimiter{
-		attempts: make(map[string][]time.Time),
-		maxAttempts: 5, // 5 attempts
-		window: time.Minute * 15, // 15 minutes window
+		attempts:    make(map[string][]time.Time),
+		maxAttempts: 5,                // 5 attempts
+		window:      time.Minute * 15, // 15 minutes window
 	}
 }
 
@@ -261,13 +250,13 @@ type SessionManager struct {
 
 // SessionData holds session information
 type SessionData struct {
-	UserID    uint
-	Username  string
-	Role      string
-	CreatedAt time.Time
+	UserID     uint
+	Username   string
+	Role       string
+	CreatedAt  time.Time
 	LastAccess time.Time
-	IPAddress string
-	UserAgent string
+	IPAddress  string
+	UserAgent  string
 }
 
 // NewSessionManager creates a new session manager

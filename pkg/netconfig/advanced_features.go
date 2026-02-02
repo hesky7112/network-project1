@@ -155,7 +155,7 @@ func (stm *STPManager) DiscoverSTP(device models.Device) (STPConfig, error) {
 
 	// Get STP information
 	foundAny := false
-	for oid, _ := range stpOIDs {
+	for oid := range stpOIDs {
 		result, err := snmp.Get([]string{oid})
 		if err == nil && len(result.Variables) > 0 {
 			foundAny = true
@@ -580,13 +580,13 @@ func (fm *FirmwareManager) sshConnect(device models.Device) (*ssh.Client, error)
 	return client, nil
 }
 
-func (fm *FirmwareManager) performPreUpgradeChecks(device models.Device) error {
+func (fm *FirmwareManager) performPreUpgradeChecks(_ models.Device) error {
 	// Perform pre-upgrade validation
 	// Check disk space, current version, etc.
 	return nil
 }
 
-func (fm *FirmwareManager) backupConfiguration(device models.Device) error {
+func (fm *FirmwareManager) backupConfiguration(_ models.Device) error {
 	// Backup device configuration before upgrade
 	return nil
 }
@@ -1189,24 +1189,24 @@ func (kcm *KubernetesClusterManager) ConfigureMultiClusterNetworking(config Clus
 	return err
 }
 
-func (kcm *KubernetesClusterManager) configureIstioMultiCluster(config ClusterNetworkConfig) error {
+func (kcm *KubernetesClusterManager) configureIstioMultiCluster(_ ClusterNetworkConfig) error {
 	// Simulate Istio configuration
 	time.Sleep(2 * time.Second)
 	//In a real scenario, this would use k8s client-go to apply Istio CRDs
 	return nil
 }
 
-func (kcm *KubernetesClusterManager) configureLinkerdMultiCluster(config ClusterNetworkConfig) error {
+func (kcm *KubernetesClusterManager) configureLinkerdMultiCluster(_ ClusterNetworkConfig) error {
 	time.Sleep(2 * time.Second)
 	return nil
 }
 
-func (kcm *KubernetesClusterManager) configureConsulMultiCluster(config ClusterNetworkConfig) error {
+func (kcm *KubernetesClusterManager) configureConsulMultiCluster(_ ClusterNetworkConfig) error {
 	time.Sleep(2 * time.Second)
 	return nil
 }
 
-func (kcm *KubernetesClusterManager) configureGenericMultiCluster(config ClusterNetworkConfig) error {
+func (kcm *KubernetesClusterManager) configureGenericMultiCluster(_ ClusterNetworkConfig) error {
 	time.Sleep(2 * time.Second)
 	return nil
 }

@@ -3,12 +3,35 @@ package wireless
 import (
 	"fmt"
 	"math/rand"
+	"net"
 	"time"
 
 	"networking-main/internal/models"
 
 	"gorm.io/gorm"
 )
+
+// Helper to validate private IPs (SSRF Shield 🛡️)
+func isValidPrivateIP(ipStr string) bool {
+	ip := net.ParseIP(ipStr)
+	if ip == nil {
+		return false
+	}
+	// Check against private blocks
+	privateBlocks := []string{
+		"10.0.0.0/8",
+		"172.16.0.0/12",
+		"192.168.0.0/16",
+	}
+
+	for _, block := range privateBlocks {
+		_, subnet, _ := net.ParseCIDR(block)
+		if subnet.Contains(ip) {
+			return true
+		}
+	}
+	return false
+}
 
 // Controller manages the wireless network
 type Controller struct {
@@ -22,21 +45,47 @@ func NewController(db *gorm.DB) *Controller {
 	}
 }
 
-// ProvisionAP adds a new AP to management
+// ProvisionAP adds a new AP to management and configures it via driver
 func (c *Controller) ProvisionAP(name, mac, ip, model string) (*models.AccessPoint, error) {
 	ap := &models.AccessPoint{
 		Name:             name,
 		MACAddress:       mac,
 		IPAddress:        ip,
 		Model:            model,
-		Status:           "online",
+		Status:           "provisioning",
 		ConnectedClients: 0,
 		LastSeen:         time.Now(),
+	}
+
+	// Validate IP Address (SSRF Protection)
+	if !isValidPrivateIP(ip) {
+		return nil, fmt.Errorf("invalid IP address: must be a private network IP")
 	}
 
 	if err := c.db.Create(ap).Error; err != nil {
 		return nil, err
 	}
+
+	// 2. Select and use driver
+	var driver WirelessDriver
+	switch model {
+	case "mikrotik":
+		driver = NewMikroTikDriver(ap)
+	default:
+		// Fallback or error
+		fmt.Printf("No driver found for model %s, skipping hardware provisioning\n", model)
+	}
+
+	if driver != nil {
+		if err := driver.ProvisionAP(ap); err != nil {
+			c.db.Model(ap).Update("status", "failed")
+			return ap, fmt.Errorf("hardware provisioning failed: %v", err)
+		}
+		c.db.Model(ap).Update("status", "online")
+	} else {
+		c.db.Model(ap).Update("status", "online") // Just assume online if no driver simulated
+	}
+
 	return ap, nil
 }
 

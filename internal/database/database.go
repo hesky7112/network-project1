@@ -240,10 +240,19 @@ func Migrate(db *gorm.DB) {
 
 func SeedAdminUser(db *gorm.DB) {
 	var count int64
-	email := "heskeyomondi@gmail.com"
+	email := os.Getenv("ADMIN_EMAIL")
+	if email == "" {
+		log.Println("⚠️  ADMIN_EMAIL not set, skipping admin seeding")
+		return
+	}
 	db.Model(&models.User{}).Where("email = ?", email).Count(&count)
 	if count == 0 {
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte("omondiAlienNet7112"), bcrypt.DefaultCost)
+		password := os.Getenv("ADMIN_PASSWORD")
+		if password == "" {
+			log.Println("⚠️  ADMIN_PASSWORD not set, skipping admin seeding or using insecure default")
+			return
+		}
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
 			log.Printf("Failed to hash admin password: %v", err)
 			return

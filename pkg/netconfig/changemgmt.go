@@ -66,12 +66,13 @@ func (cm *ChangeManager) ApproveChangeRequest(approval *ChangeApproval) error {
 		}
 
 		// Check if we have enough approvals (e.g., 1 is enough for now)
-		if approval.Status == "approved" {
+		switch approval.Status {
+		case "approved":
 			if err := tx.Model(&ChangeRequest{}).Where("id = ?", approval.ChangeRequestID).
 				Update("status", "approved").Error; err != nil {
 				return err
 			}
-		} else if approval.Status == "rejected" {
+		case "rejected":
 			if err := tx.Model(&ChangeRequest{}).Where("id = ?", approval.ChangeRequestID).
 				Update("status", "rejected").Error; err != nil {
 				return err

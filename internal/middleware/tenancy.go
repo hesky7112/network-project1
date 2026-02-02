@@ -13,19 +13,24 @@ const TenantIDKey = "tenant_id"
 func TenantMiddleware(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 1. Extract Tenant ID
-		// Priority: Header > JWT > Default (1)
-		tenantID := c.GetHeader("X-Tenant-ID")
+		// Priority: JWT > Header > Default (1)
+		tenantID := ""
 
-		// If authenticated, check user's tenant
-		if c.GetBool("authenticated") {
-			// Assuming auth middleware sets this (mock for now)
-			// userTenant := c.GetString("user_tenant_id")
-			// if userTenant != "" {
-			// 	tenantID = userTenant
-			// }
+		// If authenticated, use user's tenant from JWT
+		if _, exists := c.Get("user_id"); exists {
+			// In a real system, look up user's tenant or get from JWT claims
+			// For now, if we have a user_id, we'll assume they are bound to a tenant
+			if tid, ok := c.Get(TenantIDKey); ok {
+				tenantID = tid.(string)
+			}
 		}
 
-		// Default to main tenant if missing (Migration Path)
+		// Fallback to Header if still empty (allow for some internal/admin overrides if needed)
+		if tenantID == "" {
+			tenantID = c.GetHeader("X-Tenant-ID")
+		}
+
+		// Default to main tenant if missing
 		if tenantID == "" {
 			tenantID = "1"
 		}

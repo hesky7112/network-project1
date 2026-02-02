@@ -2,7 +2,6 @@ package provisioning
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/go-routeros/routeros"
 )
@@ -25,8 +24,8 @@ func (m *MikroTikClient) AddHotspotUser(name, password, profile, mac string) err
 	}
 	defer client.Close()
 
-	cmd := fmt.Sprintf("/ip/hotspot/user/add=name=%s=password=%s=profile=%s=mac-address=%s", name, password, profile, mac)
-	_, err = client.Run(strings.Split(cmd, "=")...)
+	// Safe command construction
+	_, err = client.Run("/ip/hotspot/user/add", "=name="+name, "=password="+password, "=profile="+profile, "=mac-address="+mac)
 	return err
 }
 
@@ -38,8 +37,8 @@ func (m *MikroTikClient) AddPPPoESecret(name, password, profile, remoteIP string
 	}
 	defer client.Close()
 
-	cmd := fmt.Sprintf("/ppp/secret/add=name=%s=password=%s=service=pppoe=profile=%s=remote-address=%s", name, password, profile, remoteIP)
-	_, err = client.Run(strings.Split(cmd, "=")...)
+	// Safe command construction
+	_, err = client.Run("/ppp/secret/add", "=name="+name, "=password="+password, "=service=pppoe", "=profile="+profile, "=remote-address="+remoteIP)
 	return err
 }
 
@@ -52,8 +51,7 @@ func (m *MikroTikClient) SetQueue(name, target, limitAt, maxLimit string) error 
 	defer client.Close()
 
 	// limitAt: 512k/512k, maxLimit: 2M/2M
-	cmd := fmt.Sprintf("/queue/simple/add=name=%s=target=%s=limit-at=%s=max-limit=%s", name, target, limitAt, maxLimit)
-	_, err = client.Run(strings.Split(cmd, "=")...)
+	_, err = client.Run("/queue/simple/add", "=name="+name, "=target="+target, "=limit-at="+limitAt, "=max-limit="+maxLimit)
 	return err
 }
 
@@ -100,14 +98,12 @@ func (m *MikroTikClient) MarkTraffic(targetIP string, category string) error {
 	}
 
 	// 1. Mark Connection
-	cmd1 := fmt.Sprintf("/ip/firewall/mangle/add=chain=prerouting=src-address=%s=protocol=udp=dst-port=%s=action=mark-connection=new-connection-mark=%s_CONN=passthrough=yes", targetIP, portRange, markName)
-	_, err = client.Run(strings.Split(cmd1, "=")...)
+	_, err = client.Run("/ip/firewall/mangle/add", "=chain=prerouting", "=src-address="+targetIP, "=protocol=udp", "=dst-port="+portRange, "=action=mark-connection", "=new-connection-mark="+markName+"_CONN", "=passthrough=yes")
 	if err != nil {
 		return err
 	}
 
 	// 2. Mark Packet
-	cmd2 := fmt.Sprintf("/ip/firewall/mangle/add=chain=prerouting=connection-mark=%s_CONN=action=mark-packet=new-packet-mark=%s_PKT=passthrough=no", markName, markName)
-	_, err = client.Run(strings.Split(cmd2, "=")...)
+	_, err = client.Run("/ip/firewall/mangle/add", "=chain=prerouting", "=connection-mark="+markName+"_CONN", "=action=mark-packet", "=new-packet-mark="+markName+"_PKT", "=passthrough=no")
 	return err
 }

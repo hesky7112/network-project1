@@ -117,12 +117,9 @@ func (s *Service) ForgotPassword(c *gin.Context) {
 	s.redis.Set(c, key, user.ID, time.Hour)
 
 	// In a real implementation, send email with reset link
-	// For now, just return success message
-	resetLink := "http://localhost:3000/reset-password?token=" + resetToken
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":    "If an account with this email exists, a password reset link has been sent.",
-		"reset_link": resetLink, // Remove this in production
+		"message": "If an account with this email exists, a password reset link has been sent.",
 	})
 }
 

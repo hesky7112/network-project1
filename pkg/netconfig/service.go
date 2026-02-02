@@ -145,7 +145,12 @@ func (s *Service) ApplyTemplate(c *gin.Context) error {
 	}
 
 	// Apply template logic would go here
-	logger.Info("Applying template", zap.String("name", template.Name))
+	logger.Info("Applying template",
+		zap.String("name", template.Name),
+		zap.String("type", template.DeviceType),
+		zap.String("content", template.Content),
+		zap.Any("variables", template.Variables),
+	)
 	return nil
 }
 

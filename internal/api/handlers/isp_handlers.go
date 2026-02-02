@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"networking-main/internal/models"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -56,9 +57,11 @@ func (h *APIHandlers) GetUserInvoices(c *gin.Context) {
 
 func (h *APIHandlers) PayInvoice(c *gin.Context) {
 	invoiceID, _ := strconv.Atoi(c.Param("id"))
+	userID := c.GetUint("user_id")
+
 	// In a real system, this would trigger Daraja. For now, we simulate success.
-	if err := h.billingService.MarkAsPaid(c.Request.Context(), uint(invoiceID)); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	if err := h.billingService.MarkAsPaid(c.Request.Context(), uint(invoiceID), userID); err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Invoice marked as paid"})
@@ -164,4 +167,58 @@ func (h *APIHandlers) ListWebhooks(c *gin.Context) {
 	var whs []models.WebhookConfig
 	h.DB.Find(&whs)
 	c.JSON(http.StatusOK, whs)
+}
+
+// ============ ISP Handlers ============
+
+// GetISPPackages returns available internet packages
+func (h *APIHandlers) GetISPPackages(c *gin.Context) {
+	// In a real app, fetch from DB. For now, return static list or mock
+	packages := []gin.H{
+		{"id": 1, "name": "Basic Home", "speed": "10Mbps", "price": 2500},
+		{"id": 2, "name": "Power User", "speed": "50Mbps", "price": 4500},
+		{"id": 3, "name": "Alien Enterprise", "speed": "1Gbps", "price": 15000},
+	}
+	c.JSON(http.StatusOK, packages)
+}
+
+// SubscribeISP handles user subscription to an ISP package
+func (h *APIHandlers) SubscribeISP(c *gin.Context) {
+	var req struct {
+		PackageID uint `json:"package_id" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	userID := c.GetUint("user_id")
+	// logic to subscribe user to package... e.g., create record in DB
+	// For now, mock success
+	c.JSON(http.StatusOK, gin.H{
+		"message":    "Subscription successful",
+		"user_id":    userID,
+		"package_id": req.PackageID,
+		"status":     "active",
+	})
+}
+
+// GetMySubscriptions returns the current user's subscriptions
+func (h *APIHandlers) GetMySubscriptions(c *gin.Context) {
+	userID := c.GetUint("user_id")
+	// logic to fetch subscriptions...
+	// Mock response
+	subscriptions := []gin.H{
+		{
+			"id":         101,
+			"package_id": 2,
+			"name":       "Power User",
+			"status":     "active",
+			"expires_at": time.Now().AddDate(0, 1, 0),
+		},
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"user_id":       userID,
+		"subscriptions": subscriptions,
+	})
 }

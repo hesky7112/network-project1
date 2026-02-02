@@ -132,11 +132,6 @@ export default function Login() {
         </div>
       </motion.div>
 
-      <div className="fixed bottom-6 right-6 border border-white/5 bg-[#050505] p-4 hidden md:block" style={{ borderRadius: '2px' }}>
-        <p className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-600 mb-2">Technical Preview</p>
-        <p className="text-[9px] font-mono text-alien-green/60 uppercase">UID: heskeyomondi@gmail.com</p>
-        <p className="text-[9px] font-mono text-alien-green/60 uppercase">KEY: omondiAlienNet7112</p>
-      </div>
     </div>
   )
 }

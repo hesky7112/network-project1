@@ -11,6 +11,7 @@ import {
   Network,
   Settings,
   Users,
+  Globe,
   Search,
   Bell,
   LogOut,
@@ -61,6 +62,7 @@ const navigation = [
   { name: 'App_Forge', href: '/studio/create', icon: Zap },
   { name: 'PDF_Forge', href: '/studio/pdf', icon: FileText },
   { name: 'Flow_Forge', href: '/studio/flow', icon: Network },
+  { name: 'ISP_Portal', href: '/isp', icon: Globe },
 ]
 
 const adminNavigation = [

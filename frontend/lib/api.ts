@@ -489,6 +489,22 @@ class ApiClient {
   async getPricingPackages(type?: string) {
     return this.get(`/hotspot/packages${type ? `?type=${type}` : ''}`)
   }
+
+  // ISP Portal
+  async getISPPackages() {
+    const response = await this.api.get('/isp/packages')
+    return response.data
+  }
+
+  async subscribeISP(packageId: number) {
+    const response = await this.api.post('/isp/subscriptions', { package_id: packageId })
+    return response.data
+  }
+
+  async getMySubscriptions() {
+    const response = await this.api.get('/isp/my-subscriptions')
+    return response.data
+  }
 }
 
 // Export singleton instance

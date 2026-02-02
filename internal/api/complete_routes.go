@@ -2,6 +2,7 @@ package api
 
 import (
 	"networking-main/internal/api/handlers"
+	"networking-main/internal/middleware"
 	"networking-main/pkg/auth"
 	"networking-main/pkg/modules"
 	"time"
@@ -15,7 +16,7 @@ func SetupCompleteRoutes(router *gin.Engine, apiHandlers *handlers.APIHandlers, 
 	v1 := router.Group("/api/v1")
 
 	// Apply Tenant Middleware
-	// v1.Use(middleware.TenantMiddleware(apiHandlers.DB)) // Commenting out until DB schema migration for tenant_id is ready to avoid breaking current requests
+	v1.Use(middleware.TenantMiddleware(apiHandlers.DB))
 
 	// Apply global rate limit (e.g. 1000 req/min)
 	v1.Use(apiHandlers.RateLimiter.RateLimit(1000, time.Minute))
@@ -168,6 +169,8 @@ func SetupCompleteRoutes(router *gin.Engine, apiHandlers *handlers.APIHandlers, 
 
 		// ============ Core Routes		// Inventory/Devices
 		devices := v1.Group("/devices")
+		devices.Use(apiHandlers.JWTMiddleware())
+		devices.Use(apiHandlers.RBACMiddleware("devices", "read"))
 		{
 			devices.GET("", apiHandlers.GetDevices)
 			devices.POST("", apiHandlers.CreateDevice)
@@ -241,6 +244,7 @@ func SetupCompleteRoutes(router *gin.Engine, apiHandlers *handlers.APIHandlers, 
 
 		// ============ Hotspot Routes ============
 		hotspot := v1.Group("/hotspot")
+		hotspot.Use(apiHandlers.JWTMiddleware())
 		{
 			hotspot.GET("/packages", apiHandlers.ListPackages)
 			hotspot.POST("/pay", apiHandlers.InitiatePayment)
@@ -264,6 +268,8 @@ func SetupCompleteRoutes(router *gin.Engine, apiHandlers *handlers.APIHandlers, 
 
 		// IPAM
 		ipam := v1.Group("/ipam")
+		ipam.Use(apiHandlers.JWTMiddleware())
+		ipam.Use(apiHandlers.RBACMiddleware("devices", "read"))
 		{
 			ipam.GET("/pools", apiHandlers.ListIPPools)
 			ipam.POST("/pools", apiHandlers.CreateIPPool)
@@ -289,6 +295,7 @@ func SetupCompleteRoutes(router *gin.Engine, apiHandlers *handlers.APIHandlers, 
 
 		// FUP
 		fup := v1.Group("/fup")
+		fup.Use(apiHandlers.JWTMiddleware())
 		{
 			fup.GET("/status", apiHandlers.JWTMiddleware(), apiHandlers.GetFUPStatus)
 			fup.POST("/config", apiHandlers.ConfigureFUP)
@@ -296,6 +303,8 @@ func SetupCompleteRoutes(router *gin.Engine, apiHandlers *handlers.APIHandlers, 
 
 		// Provisioning
 		provision := v1.Group("/provision")
+		provision.Use(apiHandlers.JWTMiddleware())
+		provision.Use(apiHandlers.RBACMiddleware("devices", "write"))
 		{
 			provision.POST("/sync/:uid/:did", apiHandlers.SyncUserToRouter)
 			provision.POST("/boost", apiHandlers.InitiateBoost)
@@ -304,6 +313,7 @@ func SetupCompleteRoutes(router *gin.Engine, apiHandlers *handlers.APIHandlers, 
 
 		// Probes
 		probes := v1.Group("/probes")
+		probes.Use(apiHandlers.JWTMiddleware())
 		{
 			probes.POST("/heartbeat", apiHandlers.ProbeHeartbeat)
 			probes.POST("/results", apiHandlers.RecordProbeResult)
@@ -311,12 +321,15 @@ func SetupCompleteRoutes(router *gin.Engine, apiHandlers *handlers.APIHandlers, 
 
 		// Webhooks
 		webhooks := v1.Group("/webhooks")
+		webhooks.Use(apiHandlers.JWTMiddleware())
 		{
 			webhooks.GET("/", apiHandlers.ListWebhooks)
 			webhooks.POST("/", apiHandlers.CreateWebhook)
 		}
 		// AIOps (Alien Features 👽)
 		aiops := v1.Group("/aiops")
+		aiops.Use(apiHandlers.JWTMiddleware())
+		aiops.Use(apiHandlers.RBACMiddleware("telemetry", "read"))
 		{
 			aiops.GET("/anomalies", apiHandlers.GetAnomalies)
 			aiops.GET("/churn/:uid", apiHandlers.PredictChurn)
@@ -340,7 +353,7 @@ func SetupCompleteRoutes(router *gin.Engine, apiHandlers *handlers.APIHandlers, 
 		}
 
 		// Infrastructure Sniffer (King Tier 👑)
-		v1.GET("/sniff/live", apiHandlers.SniffTraffic)
+		v1.GET("/sniff/live", apiHandlers.JWTMiddleware(), apiHandlers.RBACMiddleware("telemetry", "execute"), apiHandlers.SniffTraffic)
 
 		// Simulation Routes
 		simulation := v1.Group("/simulation")
@@ -352,16 +365,14 @@ func SetupCompleteRoutes(router *gin.Engine, apiHandlers *handlers.APIHandlers, 
 			simulation.POST("/restore", apiHandlers.RestoreSimulationComponent)
 		}
 
-		/*
-			// ISP
-			isp := v1.Group("/isp")
-			isp.Use(apiHandlers.JWTMiddleware())
-			{
-				isp.GET("/packages", apiHandlers.GetISPPackages)
-				isp.POST("/subscriptions", apiHandlers.SubscribeISP)
-				isp.GET("/my-subscriptions", apiHandlers.GetMySubscriptions)
-			}
-		*/
+		// ISP
+		isp := v1.Group("/isp")
+		isp.Use(apiHandlers.JWTMiddleware())
+		{
+			isp.GET("/packages", apiHandlers.GetISPPackages)
+			isp.POST("/subscriptions", apiHandlers.SubscribeISP)
+			isp.GET("/my-subscriptions", apiHandlers.GetMySubscriptions)
+		}
 		sdwan := v1.Group("/sdwan")
 		sdwan.Use(apiHandlers.JWTMiddleware())
 		{

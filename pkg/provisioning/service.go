@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"networking-main/internal/models"
+	"os"
 	"time"
 
 	"gorm.io/gorm"
@@ -33,8 +34,8 @@ func (s *Service) SyncUserToRouter(ctx context.Context, userID uint, deviceID ui
 	// For simulation, we assume device uses MikroTik
 	client := &MikroTikClient{
 		Addr:     fmt.Sprintf("%s:8728", device.IPAddress),
-		Username: "admin", // Should be fetched from secrets manager/vault
-		Password: "password",
+		Username: os.Getenv("MIKROTIK_USERNAME"),
+		Password: os.Getenv("MIKROTIK_PASSWORD"),
 	}
 
 	if user.ServiceType == "pppoe" {
@@ -60,8 +61,8 @@ func (s *Service) ProvisionQoS(ctx context.Context, userID uint, deviceID uint, 
 
 	client := &MikroTikClient{
 		Addr:     fmt.Sprintf("%s:8728", device.IPAddress),
-		Username: "admin",
-		Password: "password",
+		Username: os.Getenv("MIKROTIK_USERNAME"),
+		Password: os.Getenv("MIKROTIK_PASSWORD"),
 	}
 
 	limitStr := fmt.Sprintf("%dk/%dk", up, down)
@@ -132,8 +133,8 @@ func (s *Service) SetL7Priority(ctx context.Context, userID uint, deviceID uint,
 
 	client := &MikroTikClient{
 		Addr:     fmt.Sprintf("%s:8728", device.IPAddress),
-		Username: "admin",
-		Password: "password",
+		Username: os.Getenv("MIKROTIK_USERNAME"),
+		Password: os.Getenv("MIKROTIK_PASSWORD"),
 	}
 
 	return client.MarkTraffic(user.IPAddress, category)

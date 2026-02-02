@@ -56,12 +56,19 @@ func (s *Service) GenerateInvoice(ctx context.Context, userID uint, packageID ui
 }
 
 // MarkAsPaid updates invoice status and payment date
-func (s *Service) MarkAsPaid(ctx context.Context, invoiceID uint) error {
+func (s *Service) MarkAsPaid(ctx context.Context, invoiceID uint, userID uint) error {
 	now := time.Now()
-	return s.db.WithContext(ctx).Model(&models.Invoice{}).Where("id = ?", invoiceID).Updates(map[string]interface{}{
+	result := s.db.WithContext(ctx).Model(&models.Invoice{}).Where("id = ? AND user_id = ?", invoiceID, userID).Updates(map[string]interface{}{
 		"status":  "paid",
 		"paid_at": &now,
-	}).Error
+	})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("invoice not found or unauthorized")
+	}
+	return nil
 }
 
 // GetUserInvoices returns all invoices for a user

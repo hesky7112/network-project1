@@ -2,7 +2,6 @@ package security
 
 import (
 	"crypto/rand"
-	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
 	"net"
@@ -42,12 +41,6 @@ func GenerateSecureToken(length int) (string, error) {
 		return "", err
 	}
 	return base64.URLEncoding.EncodeToString(bytes), nil
-}
-
-// HashPassword creates a secure hash of the password
-func HashPassword(password string) string {
-	hash := sha256.Sum256([]byte(password))
-	return base64.StdEncoding.EncodeToString(hash[:])
 }
 
 // SecurityHeaders sets comprehensive security headers

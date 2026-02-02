@@ -128,6 +128,7 @@ export default function Wireless() {
                                 <option value="Network-AP-6">Network AP 6 (Wi-Fi 6)</option>
                                 <option value="Network-AP-6E">Network AP 6E (Tri-Band)</option>
                                 <option value="Network-AP-PRO">Network AP Pro</option>
+                                <option value="mikrotik">MikroTik RouterOS (CAPsMAN)</option>
                             </select>
                         </div>
                         <div className="flex justify-end gap-2">
@@ -158,10 +159,22 @@ export default function Wireless() {
                                 {aps?.map(ap => (
                                     <tr key={ap.id} className="text-sm text-slate-300 hover:bg-white/5 transition-colors">
                                         <td className="px-6 py-4">
-                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-500 border border-green-500/20">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                                                Online
-                                            </span>
+                                            {ap.status === 'provisioning' ? (
+                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />
+                                                    Provisioning
+                                                </span>
+                                            ) : ap.status === 'failed' ? (
+                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-500 border border-red-500/20">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                                                    Failed
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-500 border border-green-500/20">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                                    Online
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="px-6 py-4 font-bold text-white">{ap.name}</td>
                                         <td className="px-6 py-4 text-xs font-mono text-slate-500">{ap.model}</td>
